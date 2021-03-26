@@ -1,20 +1,20 @@
+{-# LANGUAGE FlexibleContexts          #-}
 {-# LANGUAGE NoImplicitPrelude         #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE PartialTypeSignatures     #-}
 {-# LANGUAGE TypeApplications          #-}
-{-# LANGUAGE FlexibleContexts          #-}
 
 module Main where
 
-import           FreeCat
-import           Cat
 import           CCC
+import           Cat
 import           Control.Category
 import           Data.Data
 import           Data.Generics.Aliases
-import           Prelude               hiding (id, (.), succ, pred, (&&), (==))
-import           Rewrite
+import           FreeCat
 import           Interpreter
+import           Prelude               hiding (id, pred, succ, (&&), (.), (==))
+import           Rewrite
 
 mapTuple :: (Data a, Typeable b) => (b -> b) -> a -> a
 mapTuple f = gmapT (mkT f)
@@ -47,14 +47,13 @@ main = do
   print example24
   print example25
   print example26
-  
+
   --print fac
-  
+
   let x = eval fac 10
   print 10
-  
---}
 
+--}
 
 example2 :: FreeCat (a, b) (b, a)
 example2 = simplify $ toCCC (\(x, y) -> (y, x))
@@ -162,43 +161,49 @@ example26 = simplify $ toCCC (\(x, (y, z)) -> (y, z))
 
 example28 = simplify $ toCCC (+)
 
-fac = simplify $ toCCC f where f = \n -> if n == 0 then 1 else n * f (n-1)
+fac = simplify $ toCCC f where f = \n -> if n == 0 then 1 else n * f (n -1)
 
 example29 = simplify . toCCC $ \x -> if x < 10 then 0 else 1
 
 test :: (Eq a, Num a) => a -> a
 test 4 = 1
 test _ = 0
-  
+
 example30 = simplify . toCCC test
 
 i :: a -> a
 i x = x
-  
+
 k :: a -> b -> a
 k x _y = x
-  
+
 s :: (a -> b -> c) -> (a -> b) -> a -> c
-s p q x = p x (q x)  
+s p q x = p x (q x)
 
 g :: (t -> a) -> (t -> b) -> t -> (a, b)
 g p q x = (p x, q x)
 
 apply :: (a -> b, a) -> b
-apply (f,x) = f x
+apply (f, x) = f x
 
 s' :: (a -> b -> c) -> (a -> b) -> a -> c
 s' p q x = (apply . g p q) x
 
 x = const
+
 --------------------
 --true = \x y -> x
 --false = \x y -> y
 zero = \f x -> x
+
 one = \f x -> f x
-succ = \n f x -> f(n f x)
-pred = \n f x -> n(\g h -> h (g f)) (\u -> x) (\u ->u)
-mul = \m n f -> m(n f)
+
+succ = \n f x -> f (n f x)
+
+pred = \n f x -> n (\g h -> h (g f)) (\u -> x) (\u -> u)
+
+mul = \m n f -> m (n f)
+
 --is0 = \n -> n (\x -> false) true
 --y = \f -> (\x -> x x)(\x -> f(x x))
 --fact = y(\f n -> (is0 n) 1 (mul n (f (pred n))))
@@ -225,7 +230,7 @@ cFix = simplify $ toCCC fix
 --cAnd = simplify $ toCCC (uncurry (&&))
 
 --fact :: (EqlLike p p, Num p) => p -> p
-fact = fix (\rec n -> if  n <= 1 then 1 else n * rec (n-1))
+fact = fix (\rec n -> if n <= 1 then 1 else n * rec (n -1))
 
 --cFact :: (Ord (FreeCat a' a'), Num a') => FreeCat a' a'
 cFact = simplify $ toCCC fact
@@ -239,14 +244,14 @@ is0 x = x == 0
 cIs0 :: (BoolLike b, Num a, EqLike a (FreeCat a b)) => FreeCat a b
 cIs0 = simplify $ toCCC is0
 
-pair :: (Integer,Integer)
-pair = (3,4)
+pair :: (Integer, Integer)
+pair = (3, 4)
 
 mains :: IO ()
 mains = do
-  print (is0 (8::Integer) :: Bool)
+  print (is0 (8 :: Integer) :: Bool)
   print (eval (cIs0 :: FreeCat Integer Bool) 8)
-  
+
 --  print (eval cIs0 (6::Integer) :: Bool)
 
 test1 = eval cEqual pair

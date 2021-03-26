@@ -1,9 +1,9 @@
-{-# LANGUAGE FlexibleInstances  #-}
-{-# LANGUAGE GADTs              #-}
-{-# LANGUAGE NoImplicitPrelude  #-}
-{-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE AllowAmbiguousTypes   #-}
+{-# LANGUAGE ConstraintKinds       #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE GADTs                 #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NoImplicitPrelude     #-}
 
 module Cat where
 
@@ -77,6 +77,3 @@ instance EqLike Integer Bool where
 
 class Cartesian k => EqCat k where
   eqlC :: (EqLike a b, BoolLike b)  => k (a,a) b
-
-
-

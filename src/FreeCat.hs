@@ -99,16 +99,16 @@ instance (BoolLike b) => BoolLike (FreeCat a b) where
   f && g = And . fanC f g
   f || g = Or . fanC f g
   not f = Not . f
-  true  = T
+  true = T
   false = F
 --ite f g = IfThenElse . fanC f g
 
 instance EqCat FreeCat where
   eqlC = Eql
 
-instance (BoolLike b, EqLike a b) => EqLike (FreeCat a c) b where
-  -- f == g = Eql . fanC f g
+instance (BoolLike b, EqLike a b) => EqLike (FreeCat a c) b
+
+-- f == g = Eql . fanC f g
 
 instance EqLike Integer (FreeCat Integer Bool) where
   (==) = error "NIY EqLike Integer (FreeCat Integer Bool)" --(Cat.==)
-

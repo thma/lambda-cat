@@ -4,8 +4,8 @@
 
 module Rewrite where
 
-import           FreeCat
 import           Control.Category ((.))
+import           FreeCat
 import           Prelude          hiding (id, (.))
 
 -- a dead dumb simple rewrite system
