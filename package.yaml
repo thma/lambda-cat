@@ -1,0 +1,58 @@
+name:                lambda-cat
+version:             0.1.0.0
+github:              "thma/lambda-cat"
+license:             Apache-2.0
+author:              "Thomas Mahler"
+maintainer:          "thma@apache.org"
+copyright:           "2021 Thomas Mahler"
+
+extra-source-files:
+- README.md
+
+# Metadata used when publishing your package
+# synopsis:            Compiling Haskell functions to Closed Cartesian Categories
+# category:            Compilers
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/thma/lambda-cat#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- syb
+
+library:
+  source-dirs: src
+  ghc-options:
+  - -O2
+#  - -fenable-rewrite-rules
+#  - -ddump-rule-rewrites
+
+
+executables:
+  lambda-cat-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+#    - -ddump-rule-rewrites
+    - -O2
+#    - -fenable-rewrite-rules
+    dependencies:
+    - lambda-cat
+
+tests:
+  lambda-cat-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - lambda-cat
+    - hspec
+    - QuickCheck
