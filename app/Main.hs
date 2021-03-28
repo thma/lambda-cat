@@ -3,6 +3,7 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE PartialTypeSignatures     #-}
 {-# LANGUAGE TypeApplications          #-}
+{-# LANGUAGE MonoLocalBinds #-}
 
 module Main where
 
@@ -235,8 +236,9 @@ fact = fix (\rec n -> if n <= 1 then 1 else n * rec (n -1))
 --cFact :: (Ord (FreeCat a' a'), Num a') => FreeCat a' a'
 cFact = simplify $ toCCC fact
 
-cEqual :: (BoolLike b, EqLike (FreeCat (a, a) a) (FreeCat (a, a) b)) => FreeCat (a, a) b
-cEqual = simplify $ toCCC (uncurry (==))
+
+--cEqual :: (BoolLike a, EqLike (b, b) (FreeCat (b, b) a)) => FreeCat (b, b) a
+--cEqual = simplify $ toCCC (uncurry (==))
 
 is0 :: (BoolLike b, Num a, EqLike a b) => a -> b
 is0 x = x == 0
@@ -249,9 +251,19 @@ pair = (3, 4)
 
 mains :: IO ()
 mains = do
-  print (is0 (8 :: Integer) :: Bool)
+  print (is0 (78 :: Integer) :: Bool)
   print (eval (cIs0 :: FreeCat Integer Bool) 8)
 
 --  print (eval cIs0 (6::Integer) :: Bool)
 
-test1 = eval cEqual pair
+--test1 = eval cEqual pair
+
+--abs (\x -> x)   = i
+--abs (\x -> y)   = k y
+--abs (\x -> p q) = s (\x -> p) (\x -> q)
+
+tri :: (t -> a) -> (t -> b) -> t -> (a, b)
+(f `tri` g) x = (f x, g x) 
+
+apply :: (a -> b, a) -> b
+apply (f, x) = f x
