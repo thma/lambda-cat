@@ -1,6 +1,6 @@
 # Lambda Cat
 
-<img src="./lambda-cat-logo.png" width="300" height="300" alt="Mieke the official lambda cat 2021"/>
+<img src="./lambda-cat-logo.png" width="400" height="400" alt="Mieke the official lambda cat 2021"/>
 
 
 
