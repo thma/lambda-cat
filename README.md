@@ -1,5 +1,7 @@
 # Lambda Cat
 
+### This is still heavily work in progress!!!
+
 <img src="./lambda-cat-logo.png" width="400" height="400" alt="Mieke the official lambda cat 2021"/>
 
 
@@ -31,9 +33,9 @@ Bracket abstraction `absCL` is defined by the following equations (given in pseu
 
 
 ```haskell
-absCL (\x -> x)   = i
-absCL (\x -> y)   = k y
-absCL (\x -> p q) = s (\x -> p) (\x -> q)
+absCL x (\x -> x)   = i
+absCL x (\x -> y)   = k y
+absCL x (\x -> p q) = s (absCL x p) (absCL x q)
 ```
 
 where the combinators `i`, `k` and `s` are defined as follows (these are valid haskell definitions):
@@ -55,27 +57,47 @@ Once the λ-terms are compiled to combinator terms, these terms can be interpret
 
 Combinator terms also allow to apply several more advanced interpretation techniques like graph-reduction, node-sharing, parallel reduction, etc.
 
-## Cartesian Closed Categories
+## Cartesian Closed Categories (CCC)
 
 In his famous paper [Compiling to Categories](http://conal.net/papers/compiling-to-categories/compiling-to-categories.pdf) Conal Elliot describes a way to compile from simply typed lambda-calculus terms to cartesian closed categories(CCC).
 
-At the core of his approach sits a transformation from lambda-terms to CCC expressions that are done by eliminating variables by an abstraction function `absCCC`:
+At the core of his approach sits a transformation from lambda-terms to CCC expressions that are done by eliminating variables by an abstraction function `absCCC` (again in pseudo-Haskell):
 
 ```haskell
 absCCC (\x -> x)   = id
 absCCC (\x -> y)   = const y
 absCCC (\x -> p q) = apply . ((\x -> p) △ (\x -> q))
+```
 
--- where △ and apply are defined as (in the (->) category):
+Where `(△)` is introduced by the `Cartesian` category:
 
+```haskell
+class Category k => Cartesian k where
+  (△) :: (a `k` c) -> (a `k` d) -> (a `k` (c, d))
+```
+
+In the `(->)` instance of `Cartesian` `(△)` is defined as: 
+
+```haskell
 (△):: (t -> a) -> (t -> b) -> t -> (a, b)
-(f △ g) x = (f x, g x) 
+(f △ g) x = (f x, g x)
+```
 
+And where `apply` is introduced by the `Closed` category:
+
+```haskell
+class Cartesian k => Closed k where
+  apply :: ((a -> b), a) `k` b
+```
+
+In the `(->)` instance of `Closed` `apply` is defined as 
+
+```haskell
 apply :: (a -> b, a) -> b
 apply (f, x) = f x
 ```
 
-This function `absCCC` looks quite similar to the `absCL` function defined above. The first two pattern matches are obviously equivalent as `i` and `id` are identical as well as `k y` and `const y`.
+The function `absCCC` looks surprisingly similar to the `absCL` function defined above. The first two pattern matches are obviously equivalent as `i` and `id` are identical as well as `k y` and `const y`.
 
 But what about the third clause? We have:
 
@@ -86,10 +108,27 @@ absCL (\x -> p q) = s (\x -> p) (\x -> q)
 -- and on the other: abstracting lambda-terms to CCC expressions:
 absCCC (\x -> p q) = apply . ((\x -> p) △ (\x -> q))
 ```
-Are these two definitions equal? At least for me this is not obvious. So lets try to prove it, using equational reasoning:
+Are these two definitions equal? 
+
+By eliminating all free variables from the term `apply . ((\x -> p) △ (\x -> q))` we can write it as a combinator `s'` with variables `p, q, x`:
 
 ```haskell
-absCCC (\x -> p q) = apply . ((\x -> p) △ (\x -> q))      -- definition of absCCC
-                   = apply . ()
-
+s' p q x = (apply . (p △ q)) x
 ```
+
+Now we can apply equational reasoning:
+
+```haskell
+s' p q x = (apply . (p △ q)) x   
+         = apply ((p △ q) x)     -- by definition of (.)
+         = apply (p x, q x)      -- by definition of (△)
+         = (p x) (q x)           -- by definition of apply        
+```
+
+This equals the definition of the `s` combinator:
+
+```haskell
+s p q x = (p x) (q x)
+```
+
+So we can conclude that SKI-combinators and CCC are equivalent implementations of the λ-calculus.

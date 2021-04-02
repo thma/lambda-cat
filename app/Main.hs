@@ -172,25 +172,6 @@ test _ = 0
 
 example30 = simplify . toCCC test
 
-i :: a -> a
-i x = x
-
-k :: a -> b -> a
-k x _y = x
-
-s :: (a -> b -> c) -> (a -> b) -> a -> c
-s p q x = p x (q x)
-
-g :: (t -> a) -> (t -> b) -> t -> (a, b)
-g p q x = (p x, q x)
-
-apply :: (a -> b, a) -> b
-apply (f, x) = f x
-
-s' :: (a -> b -> c) -> (a -> b) -> a -> c
-s' p q x = (apply . g p q) x
-
-x = const
 
 --------------------
 --true = \x y -> x
@@ -265,5 +246,28 @@ mains = do
 tri :: (t -> a) -> (t -> b) -> t -> (a, b)
 (f `tri` g) x = (f x, g x) 
 
+ap :: (a -> b, a) -> b
+ap (f, x) = f x
+
+
+s' :: (a -> b -> c) -> (a -> b) -> a -> c
+s' p q x = (apply . (p `tri` q)) x
+
+
+
+
+i :: a -> a
+i x = x
+
+k :: a -> b -> a
+k x _y = x
+
+s :: (a -> b -> c) -> (a -> b) -> a -> c
+s p q x = p x (q x)
+
+g :: (t -> a) -> (t -> b) -> t -> (a, b)
+g p q x = (p x, q x)
+
 apply :: (a -> b, a) -> b
 apply (f, x) = f x
+

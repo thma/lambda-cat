@@ -13,7 +13,8 @@ import           Data.Bifunctor (bimap)
 --}
 
 instance Monoidal (->) where
-  parC f g = bimap f g
+  --parC f g = bimap f g
+  parC f g (x,y) = (f x, g y)
 
 instance Cartesian (->) where
   fstC (x, _y) = x
