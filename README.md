@@ -33,9 +33,9 @@ Bracket abstraction `absCL` is defined by the following equations (given in pseu
 
 
 ```haskell
-absCL x (\x -> x)   = i
-absCL x (\x -> y)   = k y
-absCL x (\x -> p q) = s (absCL x p) (absCL x q)
+absCL (\x -> x)   = i
+absCL (\x -> y)   = k y
+absCL (\x -> p q) = s (\x -> p) (\x -> q)
 ```
 
 where the combinators `i`, `k` and `s` are defined as follows (these are valid haskell definitions):
@@ -110,7 +110,7 @@ absCCC (\x -> p q) = apply . ((\x -> p) △ (\x -> q))
 ```
 Are these two definitions equal? 
 
-By eliminating all free variables from the term `apply . ((\x -> p) △ (\x -> q))` we can write it as a combinator `s'` with variables `p, q, x`:
+By eliminating all variables from the term `apply . ((\x -> p) △ (\x -> q))` we can write it as a combinator `s'` with variables `p, q, x`:
 
 ```haskell
 s' p q x = (apply . (p △ q)) x
@@ -131,4 +131,4 @@ This equals the definition of the `s` combinator:
 s p q x = (p x) (q x)
 ```
 
-So we can conclude that SKI-combinators and CCC are equivalent implementations of the λ-calculus.
+So we can conclude that SKI-combinators and CCC are equivalent implementations of the λ-calculus. I admit this is a rather handwaving then a solid prove. You'll find a much more solid version in the classic paper [Categorical Combinators](https://core.ac.uk/download/pdf/82017242.pdf)
