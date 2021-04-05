@@ -239,35 +239,19 @@ mains = do
 
 --test1 = eval cEqual pair
 
---abs (\x -> x)   = i
---abs (\x -> y)   = k y
---abs (\x -> p q) = s (\x -> p) (\x -> q)
-
-tri :: (t -> a) -> (t -> b) -> t -> (a, b)
-(f `tri` g) x = (f x, g x) 
-
-ap :: (a -> b, a) -> b
-ap (f, x) = f x
-
-
-s' :: (a -> b -> c) -> (a -> b) -> a -> c
-s' p q x = (apply . (p `tri` q)) x
-
-
-
+area :: Fractional a => (a, a) -> a
+area (x,y) = (x-2)/2 + y
 
 i :: a -> a
 i x = x
 
 k :: a -> b -> a
-k x _y = x
+k y _ = y
 
 s :: (a -> b -> c) -> (a -> b) -> a -> c
-s p q x = p x (q x)
+s p q x = p x (q x)  
 
-g :: (t -> a) -> (t -> b) -> t -> (a, b)
-g p q x = (p x, q x)
+cId :: a -> a
+cId = s k k
 
-apply :: (a -> b, a) -> b
-apply (f, x) = f x
-
+--y=s s k (s(k(s s(s(s s k))))k)

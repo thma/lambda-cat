@@ -4,8 +4,14 @@
 
 module Interpreter where
 
-import           Cat
-import           FreeCat
+import Cat
+    ( EqCat(eqlC),
+      BoolCat(ifTE, andC, orC, notC),
+      NumCat(greC, addC, subC, mulC, leqC, geqC, lesC),
+      BoolLike(false, true),
+      Monoidal(parC),
+      Cartesian(dupC) )
+import FreeCat ( FreeCat(..) )
 import           Hask    ()
 
 fix :: (a -> a) -> a
