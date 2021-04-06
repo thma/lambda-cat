@@ -176,25 +176,17 @@ example30 = simplify . toCCC test
 
 
 --------------------
---true = \x y -> x
---false = \x y -> y
-zero = \f x -> x
 
-one = \f x -> f x
+--fact = fix (\f n -> (isZero n) 1 (* n (f (n - 1))))
 
-succ = \n f x -> f (n f x)
+iff :: (BoolLike b, EqLike b Bool) => (b,p,p) -> p
+iff (test,r,f) = if test == true then r else f
 
-pred = \n f x -> n (\g h -> h (g f)) (\u -> x) (\u -> u)
+--cIf :: BoolLike a => FreeCat a (FreeCat b (FreeCat b b))
+--cIf :: FreeCat a' (FreeCat b' (FreeCat b' b'))
+--cIf = simplify $ toCCC iff
 
-mul = \m n f -> m (n f)
-
---is0 = \n -> n (\x -> false) true
---y = \f -> (\x -> x x)(\x -> f(x x))
---fact = y(\f n -> (is0 n) 1 (mul n (f (pred n))))
---program = fact (succ (succ (succ one)))  -- Compute 4!
-
---isZero :: (EqlLike a, BoolLike b, Num a) => p -> a -> b
-isZero :: (EqLike a b, Num a) => p -> a -> b
+isZero :: (EqLike a b, Num a, BoolLike  b) => p -> a -> b
 isZero x = (== 0)
 
 cIsZero :: (EqLike (FreeCat (a', b') b') (FreeCat (a', b') c'), Num b') => FreeCat a' (FreeCat b' c')
@@ -209,15 +201,17 @@ cIsTrue = simplify $ toCCC isTrue
 cFix :: FreeCat (FreeCat a' a') a'
 cFix = simplify $ toCCC fix
 
---cAnd :: (BoolLike a) => FreeCat (a, a) a
---cAnd :: (BoolLike b') => FreeCat (b', b') b'
---cAnd = simplify $ toCCC (uncurry (&&))
+cAnd :: BoolLike b' => FreeCat (b', b') b'
+cAnd = simplify $ toCCC (uncurry (&&))
 
 --fact :: (EqlLike p p, Num p) => p -> p
-fact = fix (\rec n -> if n <= 1 then 1 else n * rec (n -1))
+--fact :: (BoolLike b, EqLike b Bool, EqLike p b, Num p) => p -> p
+--fact = fix (\rec n -> iff (n == 0) 1 (n * rec (n -1)))
+
+--check (x,y) = iff (x == 3) x y
 
 --cFact :: (Ord (FreeCat a' a'), Num a') => FreeCat a' a'
-cFact = simplify $ toCCC fact
+--cFact = simplify $ toCCC fact
 
 
 eql :: EqLike a b => (a, a) -> b
@@ -245,6 +239,8 @@ mains = do
   print (eval cIs0 (0::Integer) :: Bool)
 
   print (eval cEqual pair :: Bool)
+
+  print (cIsTrue :: FreeCat Bool Bool)
 
 area :: Fractional a => (a, a) -> a
 area (x,y) = (x-2)/2 + y

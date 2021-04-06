@@ -6,9 +6,9 @@ import           CCC
 import           Cat
 import           FreeCat
 import           Interpreter
-import           Prelude         (Bool (..), Double, Float, Int, Integer, abs,
+import           Prelude         (Bool (..), Double, Float, Int, Num, Integer, abs,
                                   id, negate, uncurry, ($), (&&), (*), (+), (-),
-                                  (.))
+                                  (.), (==))
 import           Rewrite
 import           Test.Hspec
 import           Test.QuickCheck
@@ -40,6 +40,10 @@ add2CCC = simplify $ toCCC (2 +)
 isTrueCCC :: FreeCat Bool Bool
 isTrueCCC = simplify $ toCCC (true Cat.&&)
 
+
+is0CCC :: FreeCat Integer Bool 
+is0CCC = simplify $ toCCC (Cat.== 0)
+
 spec :: Spec
 spec = do
   describe "The CCC Interpreter" $ do
@@ -61,3 +65,5 @@ spec = do
       property $ \x -> eval add2CCC x `shouldBe` x + 2
     it "interpretes partial evaluated functions with booleans" $
       property $ \x -> eval isTrueCCC x `shouldBe` x Prelude.&& True
+    it "checks equality on numbers" $
+      property $ \x -> eval is0CCC x `shouldBe` x Prelude.== 0

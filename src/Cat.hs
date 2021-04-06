@@ -75,5 +75,8 @@ class (BoolLike b) => EqLike a b where
 instance EqLike Integer Bool where
   (==) = (Prelude.==)
 
+instance EqLike Bool Bool where
+  (==) = (Prelude.==)  
+
 class Cartesian k => EqCat k where
   eqlC :: (EqLike a b, BoolLike b)  => k (a,a) b
