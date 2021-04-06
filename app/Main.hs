@@ -54,6 +54,8 @@ main = do
   let x = eval fac 10
   print 10
 
+  mains
+
 --}
 
 example2 :: FreeCat (a, b) (b, a)
@@ -219,12 +221,13 @@ cFact = simplify $ toCCC fact
 
 
 --cEqual :: (BoolLike a, EqLike (b, b) (FreeCat (b, b) a)) => FreeCat (b, b) a
---cEqual = simplify $ toCCC (uncurry (==))
+cEqual :: EqLike (FreeCat (b', b') b') (FreeCat (b', b') b) => FreeCat (b', b') b
+cEqual = simplify $ toCCC (uncurry (==))
 
 is0 :: (BoolLike b, Num a, EqLike a b) => a -> b
 is0 x = x == 0
 
-cIs0 :: (BoolLike b, Num a, EqLike a (FreeCat a b)) => FreeCat a b
+cIs0 :: (BoolLike b, Num a, EqLike a (FreeCat a b), EqLike a b) => FreeCat a b
 cIs0 = simplify $ toCCC is0
 
 pair :: (Integer, Integer)
@@ -235,9 +238,9 @@ mains = do
   print (is0 (78 :: Integer) :: Bool)
   print (eval (cIs0 :: FreeCat Integer Bool) 8)
 
---  print (eval cIs0 (6::Integer) :: Bool)
+  print (eval cIs0 (0::Integer) :: Bool)
 
---test1 = eval cEqual pair
+  --print $ eval cEqual pair
 
 area :: Fractional a => (a, a) -> a
 area (x,y) = (x-2)/2 + y
