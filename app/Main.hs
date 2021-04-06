@@ -220,9 +220,13 @@ fact = fix (\rec n -> if n <= 1 then 1 else n * rec (n -1))
 cFact = simplify $ toCCC fact
 
 
+eql :: EqLike a b => (a, a) -> b
+eql (x,y) = x == y
+
 --cEqual :: (BoolLike a, EqLike (b, b) (FreeCat (b, b) a)) => FreeCat (b, b) a
+--cEqual :: EqLike (FreeCat (b', b') b') (FreeCat (b', b') b) => FreeCat (b', b') b
 cEqual :: EqLike (FreeCat (b', b') b') (FreeCat (b', b') b) => FreeCat (b', b') b
-cEqual = simplify $ toCCC (uncurry (==))
+cEqual = simplify $ toCCC eql
 
 is0 :: (BoolLike b, Num a, EqLike a b) => a -> b
 is0 x = x == 0
@@ -231,7 +235,7 @@ cIs0 :: (BoolLike b, Num a, EqLike a (FreeCat a b), EqLike a b) => FreeCat a b
 cIs0 = simplify $ toCCC is0
 
 pair :: (Integer, Integer)
-pair = (3, 4)
+pair = (23, 23)
 
 mains :: IO ()
 mains = do
@@ -240,7 +244,7 @@ mains = do
 
   print (eval cIs0 (0::Integer) :: Bool)
 
-  --print $ eval cEqual pair
+  print (eval cEqual pair :: Bool)
 
 area :: Fractional a => (a, a) -> a
 area (x,y) = (x-2)/2 + y

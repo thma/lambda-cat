@@ -113,3 +113,7 @@ instance (BoolLike b, EqLike a b) => EqLike (FreeCat a a) (FreeCat a b) where
 
 instance EqLike Integer (FreeCat Integer Bool) where
   (==) = error "NYI EqLike Integer (FreeCat Integer Bool)" --(Cat.==)
+
+instance EqLike (FreeCat (Integer, Integer) Integer)
+                (FreeCat (Integer, Integer) Bool) where
+  f == g = Eql . fanC f g
