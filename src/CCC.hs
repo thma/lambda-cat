@@ -52,9 +52,9 @@ instance (Num b, Num a) => Num (Either a b) where
     (Left f) * (Left g)   = Left (f * g)
     (Right f) * (Right g) = Right (f * g)
     negate f = error "Todo"
-    f - g = error "todo"
-    abs f = error "todo"
-    signum = error "TODO"
+    f - g    = error "todo"
+    abs f    = error "todo"
+    signum   = error "TODO"
     fromInteger = error "TODO"
 
 type family Reverse a b where

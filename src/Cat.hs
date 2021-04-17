@@ -5,6 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude     #-}
 
+{-# LANGUAGE TypeOperators #-}
 module Cat where
 
 import           Control.Category
@@ -24,8 +25,8 @@ class Monoidal k => Cartesian k where
   dupC :: k a (a, a)
 
 class Cartesian k => Closed k where
-  applyC :: k (k a b, a) b
-  curryC :: k (a, b) c -> k a (k b c)
+  applyC   :: k (k a b, a) b
+  curryC   :: k (a, b) c -> k a (k b c)
   uncurryC :: k a (k b c) -> k (a, b) c
 
 fanC :: Cartesian cat => cat b c -> cat b d -> cat b (c, d)
@@ -36,7 +37,7 @@ idC = id
 
 class Cartesian k => NumCat k where
   mulC :: Num a => k (a, a) a
-  negateC :: Num a => k a a
+  negC :: Num a => k a a
   addC :: Num a => k (a, a) a
   subC :: Num a => k (a, a) a
   absC :: Num a => k a a
@@ -51,23 +52,21 @@ class Cartesian k => BoolCat k where
   andC :: BoolLike a => k (a, a) a
   orC  :: BoolLike a => k (a, a) a
   notC :: BoolLike a => k a a
-  ifTE :: BoolLike a => k (a, (b, b)) b
+  ifTE :: k (Bool, (k b d, k b d)) (k b d)
 
 class BoolLike a where
-  (&&) :: a -> a -> a
-  (||) :: a -> a -> a
-  not :: a -> a
-  true :: a
+  (&&)  :: a -> a -> a
+  (||)  :: a -> a -> a
+  not   :: a -> a
+  true  :: a
   false :: a
-  ite :: a -> (b, b) -> b
 
 instance BoolLike Bool where
-  (&&) = (Prelude.&&)
-  (||) = (Prelude.||)
-  not  = Prelude.not
-  true = True
+  (&&)  = (Prelude.&&)
+  (||)  = (Prelude.||)
+  not   = Prelude.not
+  true  = True
   false = False
-  ite test (thenPart, elsePart) = if test then thenPart else elsePart
 
 class (BoolLike b) => EqLike a b where
   (==) ::  a -> a -> b
@@ -76,7 +75,7 @@ instance EqLike Integer Bool where
   (==) = (Prelude.==)
 
 instance EqLike Bool Bool where
-  (==) = (Prelude.==)  
+  (==) = (Prelude.==)
 
 class Cartesian k => EqCat k where
   eqlC :: (EqLike a b, BoolLike b)  => k (a,a) b

@@ -8,6 +8,9 @@
 {-# OPTIONS_GHC -fno-warn-orphans  #-}
 {-# LANGUAGE FlexibleContexts      #-}
 
+{-# LANGUAGE InstanceSigs #-}
+{-# OPTIONS_GHC -Wno-deferred-type-errors #-}
+
 module FreeCat where
 
 import           Cat
@@ -44,7 +47,7 @@ data FreeCat a b where
   Not :: (BoolLike a) => FreeCat a a
   T :: (BoolLike a) => FreeCat b a
   F :: (BoolLike a) => FreeCat b a
-  IfThenElse :: (BoolLike a) => FreeCat (a, (b, b)) b
+  IfThenElse :: (BoolLike test) => FreeCat (test, (FreeCat b c, FreeCat b c)) (FreeCat b c)
 
 instance Closed FreeCat where
   applyC = Apply
@@ -71,7 +74,7 @@ instance Cartesian FreeCat where
 
 instance NumCat FreeCat where
   mulC = Mul
-  negateC = Neg
+  negC = Neg
   addC = Add
   subC = Sub
   absC = Abs
@@ -92,9 +95,13 @@ instance (Num a) => Num (FreeCat z a) where
 
 instance BoolCat FreeCat where
   andC = And
-  orC = Or
+  orC  = Or
   notC = Not
+  --ifTE :: (BoolLike a) => FreeCat (a, (FreeCat b d, FreeCat b d)) (FreeCat b d)
+  --ifTE :: (BoolLike a) => FreeCat (FreeCat (a, (FreeCat b d, FreeCat b d)) b) d
+  --ifTE :: FreeCat (a, (FreeCat b d, FreeCat b d)) (FreeCat b d)
   ifTE = IfThenElse
+
 
 instance (BoolLike b) => BoolLike (FreeCat a b) where
   f && g = And . fanC f g
@@ -102,13 +109,16 @@ instance (BoolLike b) => BoolLike (FreeCat a b) where
   not f = Not . f
   true = T
   false = F
---ite f g = IfThenElse . fanC f g
+  --ite :: FreeCat a b -> (FreeCat c d, FreeCat c d) -> FreeCat c d
+  --ite test (f,g) = undefined --_IfThenElse . test . fanC f g
+
+
 
 instance EqCat FreeCat where
   eqlC = Eql
 
 
-instance (BoolLike b, EqLike a b) => EqLike (FreeCat a a) (FreeCat a b) where 
+instance (BoolLike b, EqLike a b) => EqLike (FreeCat a a) (FreeCat a b) where
   f == g = Eql . fanC f g
 
 instance EqLike Integer (FreeCat Integer Bool) where

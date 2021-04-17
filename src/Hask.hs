@@ -19,7 +19,7 @@ instance Monoidal (->) where
 instance Cartesian (->) where
   fstC (x, _y) = x
   sndC (_x, y) = y
-  dupC x = (x, x)
+  dupC x       = (x, x)
 
 instance Closed (->) where
   applyC (f, x) = f x
@@ -28,11 +28,10 @@ instance Closed (->) where
 
 instance NumCat (->) where
   mulC = uncurry (*)
-  negateC = negate
+  negC = negate
   addC = uncurry (+)
   subC = uncurry (-)
   absC = abs
---  eqlC = uncurry (==)
 --  leqC = uncurry (<=)
 --  geqC = uncurry (>=)
 --  lesC = uncurry (<)
@@ -40,9 +39,9 @@ instance NumCat (->) where
 
 instance BoolCat (->) where
   andC = uncurry (Cat.&&)
-  orC = uncurry (Cat.||)
+  orC  = uncurry (Cat.||)
   notC = Cat.not
-  ifTE = uncurry Cat.ite
+  ifTE (test, (f,g)) x = if test then f x else g x
 
 instance EqCat (->) where
   eqlC = uncurry (Cat.==)

@@ -63,3 +63,8 @@ In the `(->)` instance of `Closed` `apply` is defined as
 apply :: (a -> b, a) -> b
 apply (f, x) = f x
 ```
+
+## the bool issue
+
+I'm currently stuck with a tricky type class issue.
+I'm trying to instantiate 
