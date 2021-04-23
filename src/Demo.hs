@@ -66,19 +66,19 @@ data FreeCat a b where
 deriving instance Show (FreeCat a b)
 
 
-eval :: FreeCat a b -> (a -> b)
-eval (Comp f g)   = eval f . eval g
-eval (Par f g)    = parC (eval f) (eval g)
-eval Id           = id
-eval Fst          = fst
-eval Snd          = snd
-eval Dup          = dupC
-eval And          = andC
-eval Or           = orC
-eval Not          = notC
-eval T            = const true
-eval F            = const false
-eval (IfTE t (f,g)) = undefined --ifTE (t, (f,g))
+ev :: FreeCat a b -> (a -> b)
+ev (Comp f g)   = ev f . ev g
+ev (Par f g)    = parC (ev f) (ev g)
+ev Id           = id
+ev Fst          = fst
+ev Snd          = snd
+ev Dup          = dupC
+ev And          = andC
+ev Or           = orC
+ev Not          = notC
+ev T            = const true
+ev F            = const false
+ev (IfTE t (f,g)) = undefined --ifTE (t, (f,g))
 
 
 
@@ -86,7 +86,7 @@ eval (IfTE t (f,g)) = undefined --ifTE (t, (f,g))
 
 test :: IO ()
 test = do
-  print $ eval And (True,True)
-  print $ eval Not False
-  print $ eval Or (True,False)
- -- print $ eval $ IfThenElse T Id Id
+  print $ ev And (True,True)
+  print $ ev Not False
+  print $ ev Or (True,False)
+ -- print $ ev $ IfThenElse T Id Id

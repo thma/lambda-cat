@@ -4,6 +4,7 @@
 {-# LANGUAGE PartialTypeSignatures     #-}
 {-# LANGUAGE TypeApplications          #-}
 {-# LANGUAGE MonoLocalBinds #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module Main where
 
@@ -231,6 +232,13 @@ cIs0 = simplify $ toCCC is0
 pair :: (Integer, Integer)
 pair = (23, 23)
 
+simple :: (Num a, EqLike a Bool, Eq a) => a -> a
+simple 1 = 1
+simple _ = 23
+
+cSimple :: (Num a, EqLike (FreeCat a a) Bool) => FreeCat a a
+cSimple = simplify $ toCCC simple
+
 mains :: IO ()
 mains = do
   print (is0 (78 :: Integer) :: Bool)
@@ -241,6 +249,9 @@ mains = do
   print (eval cEqual pair :: Bool)
 
   print (cIsTrue :: FreeCat Bool Bool)
+
+  print (eval cSimple 1 :: Integer)
+
 
 area :: Fractional a => (a, a) -> a
 area (x,y) = (x-2)/2 + y

@@ -27,3 +27,6 @@ stack.yaml
 stack.yaml.lock
 *.cabal
 
+.vscode/tasks.json
+.vscode/phoityne.log
+.vscode/launch.json

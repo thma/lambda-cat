@@ -127,3 +127,9 @@ instance EqLike Integer (FreeCat Integer Bool) where
 instance EqLike (FreeCat (Integer, Integer) Integer)
                 (FreeCat (Integer, Integer) Bool) where
   f == g = Eql . fanC f g
+
+instance EqLike (FreeCat Integer Integer) Bool where
+  f == g = error "NYI EqLike (FreeCat Integer Integer) Bool" --Eql . fanC f g
+
+instance Eq (FreeCat a a) where
+  f == g = f Prelude.== g
