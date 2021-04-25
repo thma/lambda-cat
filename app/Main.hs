@@ -233,24 +233,46 @@ pair :: (Integer, Integer)
 pair = (23, 23)
 
 simple :: (Num a, EqLike a Bool, Eq a) => a -> a
-simple 1 = 1
+--simple x = 1
 simple _ = 23
 
 cSimple :: (Num a, EqLike (FreeCat a a) Bool) => FreeCat a a
 cSimple = simplify $ toCCC simple
 
+cnst :: a -> b -> a
+cnst = const
+
+--cCnst :: FreeCat a (FreeCat b a)
+cCnst = simplify $ toCCC (cnst 7)
+
 mains :: IO ()
 mains = do
+
+  print (simple 4 :: Integer)
+
   print (is0 (78 :: Integer) :: Bool)
   print (eval (cIs0 :: FreeCat Integer Bool) 8)
 
-  print (eval cIs0 (0::Integer) :: Bool)
+  print (cIs0 :: FreeCat Integer Bool)
+
+  -- print 
+  --   (eval 
+  --     cIs0 
+  --     (0::Integer) :: Bool)
 
   print (eval cEqual pair :: Bool)
 
   print (cIsTrue :: FreeCat Bool Bool)
 
-  print (eval cSimple 1 :: Integer)
+  print (eval cIsTrue True :: Bool)
+
+  print (cSimple :: FreeCat Integer Integer)
+
+  print (cCnst :: FreeCat Integer (FreeCat Integer Integer))
+
+  print (eval cCnst 78 :: Integer)
+
+  --print (eval cSimple 1 :: Integer)
 
 
 area :: Fractional a => (a, a) -> a

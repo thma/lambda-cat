@@ -7,7 +7,6 @@
 {-# LANGUAGE StandaloneDeriving    #-}
 {-# OPTIONS_GHC -fno-warn-orphans  #-}
 {-# LANGUAGE FlexibleContexts      #-}
-
 {-# LANGUAGE InstanceSigs #-}
 {-# OPTIONS_GHC -Wno-deferred-type-errors #-}
 
@@ -112,11 +111,8 @@ instance (BoolLike b) => BoolLike (FreeCat a b) where
   --ite :: FreeCat a b -> (FreeCat c d, FreeCat c d) -> FreeCat c d
   --ite test (f,g) = undefined --_IfThenElse . test . fanC f g
 
-
-
 instance EqCat FreeCat where
   eqlC = Eql
-
 
 instance (BoolLike b, EqLike a b) => EqLike (FreeCat a a) (FreeCat a b) where
   f == g = Eql . fanC f g
@@ -131,5 +127,5 @@ instance EqLike (FreeCat (Integer, Integer) Integer)
 instance EqLike (FreeCat Integer Integer) Bool where
   f == g = error "NYI EqLike (FreeCat Integer Integer) Bool" --Eql . fanC f g
 
-instance Eq (FreeCat a a) where
+instance Eq (FreeCat a b) where
   f == g = f Prelude.== g

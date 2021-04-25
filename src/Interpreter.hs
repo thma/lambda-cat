@@ -51,49 +51,49 @@ eval T            = const true
 eval F            = const false
 --eval IfThenElse   = \(test, (f,g)) -> Id
 
-p x = do
-  printIt x
-  putStr "\n"
+-- p x = do
+--   printIt x
+--   putStr "\n"
 
-printIt :: FreeCat a b -> IO ()
-printIt (Comp f g)   = do 
-                          putStr "Comp ("
-                          printIt f 
-                          putStr " "
-                          printIt g
-                          putStr ")"
-printIt (Par f g)    = do
-                          putStr "Par ("
-                          printIt f 
-                          putStr " "
-                          printIt g
-                          putStr ")"
-printIt (Curry f)    = do
-                          putStr "Curry "
-                          printIt f 
-printIt (Uncurry f)  = do
-                          putStr "Uncurry "
-                          printIt f 
-printIt Apply        = putStr "Apply "
-printIt Id           = putStr "Id "
-printIt (IntConst i) = putStr $ "IntConst " ++ show i
-printIt FromInt      = putStr "FromInt "
-printIt Fst          = putStr "Fst "
-printIt Snd          = putStr "Snd "
-printIt Dup          = putStr "Dup "
-printIt Add          = putStr "Add "
-printIt Sub          = putStr "Sub "
-printIt Abs          = putStr "Abs "
-printIt Neg          = putStr "Neg "
-printIt Mul          = putStr "Mul "
-printIt (Wrap f)     = putStr $"Wrap " ++ show f
-printIt Eql          = putStr "Eql "
-printIt Leq          = putStr "Leq "
-printIt Geq          = putStr "Geq "
-printIt Les          = putStr "Les "
-printIt Gre          = putStr "Gre "
-printIt And          = putStr "And "
-printIt Or           = putStr "or "
-printIt Not          = putStr "Not "
-printIt T            = putStr "T "
-printIt F            = putStr "F "
+-- printIt :: FreeCat a b -> IO ()
+-- printIt (Comp f g)   = do 
+--                           putStr "Comp ("
+--                           printIt f 
+--                           putStr " "
+--                           printIt g
+--                           putStr ")"
+-- printIt (Par f g)    = do
+--                           putStr "Par ("
+--                           printIt f 
+--                           putStr " "
+--                           printIt g
+--                           putStr ")"
+-- printIt (Curry f)    = do
+--                           putStr "Curry "
+--                           printIt f 
+-- printIt (Uncurry f)  = do
+--                           putStr "Uncurry "
+--                           printIt f 
+-- printIt Apply        = putStr "Apply "
+-- printIt Id           = putStr "Id "
+-- printIt (IntConst i) = putStr $ "IntConst " ++ show i
+-- printIt FromInt      = putStr "FromInt "
+-- printIt Fst          = putStr "Fst "
+-- printIt Snd          = putStr "Snd "
+-- printIt Dup          = putStr "Dup "
+-- printIt Add          = putStr "Add "
+-- printIt Sub          = putStr "Sub "
+-- printIt Abs          = putStr "Abs "
+-- printIt Neg          = putStr "Neg "
+-- printIt Mul          = putStr "Mul "
+-- printIt (Wrap f)     = putStr $"Wrap " ++ show f
+-- printIt Eql          = putStr "Eql "
+-- printIt Leq          = putStr "Leq "
+-- printIt Geq          = putStr "Geq "
+-- printIt Les          = putStr "Les "
+-- printIt Gre          = putStr "Gre "
+-- printIt And          = putStr "And "
+-- printIt Or           = putStr "or "
+-- printIt Not          = putStr "Not "
+-- printIt T            = putStr "T "
+-- printIt F            = putStr "F "

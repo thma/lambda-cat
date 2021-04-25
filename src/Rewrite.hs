@@ -1,12 +1,12 @@
-{-# LANGUAGE GADTs              #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE ImpredicativeTypes #-}
-{-# LANGUAGE NoImplicitPrelude  #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
-module Rewrite where
+module Rewrite (simplify) where
 
-import           Control.Category ((.))
-import           FreeCat
-import           Prelude          hiding (id, (.))
+import Control.Category ((.))
+import FreeCat
+import Prelude hiding (id, (.))
 
 -- a dead dumb simple rewrite system
 -- it is expecially easy since our ctagoerical lnauggae has no names in it
@@ -28,61 +28,60 @@ import           Prelude          hiding (id, (.))
 
 type Rule = forall a b. FreeCat a b -> Maybe (FreeCat a b)
 
--- stop using prefix rule. It is annoying
-ruleParen :: Rule -- FreeCat a b -> Maybe (FreeCat a b)
+ruleParen :: Rule
 ruleParen (Comp (Comp f g) h) = Just (Comp f (Comp g h))
-ruleParen _                   = Nothing
+ruleParen _ = Nothing
 
-ruleFstsndpar :: FreeCat a b -> Maybe (FreeCat a b)
+ruleFstsndpar :: Rule
 ruleFstsndpar (Comp (Par Fst Snd) Dup) = Just Id
-ruleFstsndpar _                        = Nothing
+ruleFstsndpar _ = Nothing
 
-ruleFstDup :: FreeCat a b -> Maybe (FreeCat a b)
+ruleFstDup :: Rule
 ruleFstDup (Comp Fst Dup) = Just Id
-ruleFstDup _              = Nothing
+ruleFstDup _ = Nothing
 
-ruleSndDup :: FreeCat a b -> Maybe (FreeCat a b)
+ruleSndDup :: Rule
 ruleSndDup (Comp Snd Dup) = Just Id
-ruleSndDup _              = Nothing
+ruleSndDup _ = Nothing
 
-ruleParDup :: FreeCat a b -> Maybe (FreeCat a b)
+ruleParDup :: Rule
 ruleParDup (Comp (Par (Comp f Fst) (Comp g Snd)) Dup) = Just (Par f g)
-ruleParDup _                                          = Nothing
+ruleParDup _ = Nothing
 
-ruleParDup' :: FreeCat a b -> Maybe (FreeCat a b)
-ruleParDup' (Comp (Par (Comp f Fst) (Comp g Fst)) Dup) = Just (((Par f g) . Dup) . Fst)
+ruleParDup' :: Rule
+ruleParDup' (Comp (Par (Comp f Fst) (Comp g Fst)) Dup) = Just ((Par f g . Dup) . Fst)
 ruleParDup' _ = Nothing
 
-ruleParDup'' :: FreeCat a b -> Maybe (FreeCat a b)
-ruleParDup'' (Comp (Par (Comp f Snd) (Comp g Snd)) Dup) = Just (((Par f g) . Dup) . Snd)
+ruleParDup'' :: Rule
+ruleParDup'' (Comp (Par (Comp f Snd) (Comp g Snd)) Dup) = Just ((Par f g . Dup) . Snd)
 ruleParDup'' _ = Nothing
 
 -- parC dupC" forall f. (_parC f f) . _dupC = _dupC . f
 {- -- needs equality.
-rule_par_dup_eq :: FreeCat a b -> Maybe (FreeCat a b)
-rule_par_dup_eq (Comp (Par f f) Dup) | f == f = Dup . f
--}
+ruleParDupEq :: Rule -- FreeCat a b -> Maybe (FreeCat a b)
+ruleParDupEq (Comp (Par f g) Dup) | f == g = Just (Dup . f)
+ruleParDupEq _                             = Nothing
+--}
 
 -- build the curry rules.
-ruleCurry :: FreeCat a b -> Maybe (FreeCat a b)
+ruleCurry :: Rule
 ruleCurry (Curry (Uncurry f)) = Just f
-ruleCurry _                   = Nothing
+ruleCurry _ = Nothing
 
-ruleCurry' :: FreeCat a b -> Maybe (FreeCat a b)
-ruleCurry' (Uncurry (Curry f)) = Just f
-ruleCurry' _                   = Nothing
+ruleCurry' :: Rule
+ruleCurry' _ = Nothing
 
 ruleCurryApply :: Rule
 ruleCurryApply (Curry Apply) = Just Id
-ruleCurryApply _             = Nothing
+ruleCurryApply _ = Nothing
 
-ruleIdLeft :: FreeCat a b -> Maybe (FreeCat a b)
+ruleIdLeft :: Rule
 ruleIdLeft (Comp Id f) = Just f
-ruleIdLeft _           = Nothing
+ruleIdLeft _ = Nothing
 
-ruleIdRight :: FreeCat a b -> Maybe (FreeCat a b)
+ruleIdRight :: Rule
 ruleIdRight (Comp f Id) = Just f
-ruleIdRight _           = Nothing
+ruleIdRight _ = Nothing
 
 allRules :: [Rule]
 allRules =
@@ -100,53 +99,38 @@ allRules =
     ruleParen
   ]
 
--- yeah. Easily possible to get nasty infinite loops
-recurseMatch :: Rule -> FreeCat a b -> Maybe (FreeCat a b)
-recurseMatch rule x = case rule x of
-  Nothing -> goDown (recurseMatch rule) x -- This rule didn't match. Try going down and matching there.
-  Just x' -> Just x' -- travFree rule x' -- or can keep trying while we're already there.
+maxDepth :: Int
+maxDepth = 1000
 
-goDown :: Rule -> FreeCat a b -> Maybe (FreeCat a b)
-goDown z (Comp f g) = case (z f) of
-  Nothing -> case (z g) of
+-- Avoid infinite loops by allowing only a recursion depth of `maxDepth`
+recurseMatch :: Int -> Rule -> FreeCat a b -> Maybe (FreeCat a b)
+recurseMatch 0 _rule _x = Nothing
+recurseMatch depth rule x = case rule x of
+  Nothing -> goDown (recurseMatch (depth -1) rule) x -- This rule didn't match. Try going down and matching there.
+  Just x' -> Just x'
+
+goDown :: Rule -> Rule --FreeCat a b -> Maybe (FreeCat a b)
+goDown z (Comp f g) = case z f of
+  Nothing -> case z g of
     Nothing -> Nothing
-    Just x  -> Just (Comp f x)
+    Just x -> Just (Comp f x)
   Just x -> Just (Comp x g)
-goDown z (Par f g) = case (z f) of
-  Nothing -> case (z g) of
+goDown z (Par f g) = case z f of
+  Nothing -> case z g of
     Nothing -> Nothing -- nothing in either subtree macthed
-    Just x  -> Just (Par f x) --
+    Just x -> Just (Par f x) --
   Just x -> Just (Par x g) -- something in f matched the rule
 goDown z (Curry f) = case z f of
   Nothing -> Nothing
-  Just x  -> Just (Curry x)
+  Just x -> Just (Curry x)
 goDown z (Uncurry f) = case z f of
   Nothing -> Nothing
-  Just x  -> Just (Uncurry x)
+  Just x -> Just (Uncurry x)
 goDown _ _ = Nothing -- can't go down
-{-
-goDown z (Par f g) = Par (z f) (z g)
-goDown z Dup = Dup
-goDown _ Fst = Fst
-goDown _ Snd = Snd
-goDown _ f = f
--}
-
-{-
-travFree rule x@(Comp f g) = case rule x of
-                             Nothing -> Comp (travFree rule f) (travFree rule g)
-                             Just x' -> travFree rule x'
-travFree rule Id = case rule Id of
-	                  Nothing -> Id
-	                  Just x' -> travFree rule x'
--}
--- can recursively go down rules until onew hits, then start all over. Put common rules first.
-
-type Rule' a b = FreeCat a b -> Maybe (FreeCat a b)
 
 rewrite' :: [Rule] -> [Rule] -> FreeCat a b -> FreeCat a b
 rewrite' _ [] k = k -- no rules matched
-rewrite' allrules (rule : rules) k = case recurseMatch rule k of
+rewrite' allrules (rule : rules) k = case recurseMatch maxDepth rule k of
   Nothing -> rewrite' allrules rules k -- try the next rule
   Just k' -> rewrite' allrules allrules k' -- start over from the beginning
 
