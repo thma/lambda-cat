@@ -21,6 +21,9 @@ import           Rewrite
 mapTuple :: (Data a, Typeable b) => (b -> b) -> a -> a
 mapTuple f = gmapT (mkT f)
 
+ccc :: (FreeCat a a -> FreeCat a b) -> FreeCat a b
+ccc = simplify . toCCC @FreeCat
+
 --
 main :: IO ()
 main = do
@@ -173,7 +176,7 @@ test :: (Eq a, Num a) => a -> a
 test 4 = 1
 test _ = 0
 
-example30 = simplify . toCCC test
+example30 = ccc test
 
 
 --------------------
@@ -275,9 +278,6 @@ mains = do
   --print (eval cSimple 1 :: Integer)
 
 
-area :: Fractional a => (a, a) -> a
-area (x,y) = (x-2)/2 + y
-
 i :: a -> a
 i x = x
 
@@ -290,4 +290,7 @@ s p q x = p x (q x)
 cId :: a -> a
 cId = s k k
 
---y=s s k (s(k(s s(s(s s k))))k)
+ccId :: FreeCat b b
+ccId = ccc (s k k)
+
+

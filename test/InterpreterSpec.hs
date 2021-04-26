@@ -44,6 +44,18 @@ isTrueCCC = simplify $ toCCC (true Cat.&&)
 is0CCC :: FreeCat Integer Bool 
 is0CCC = simplify $ toCCC (Cat.== 0)
 
+i :: a -> a
+i x = x
+
+k :: a -> b -> a
+k y _ = y
+
+s :: (a -> b -> c) -> (a -> b) -> a -> c
+s p q x = p x (q x)  
+
+idCCC' :: FreeCat Int Int
+idCCC' = simplify $ toCCC (s k k)
+
 spec :: Spec
 spec = do
   describe "The CCC Interpreter" $ do
@@ -67,3 +79,5 @@ spec = do
       property $ \x -> eval isTrueCCC x `shouldBe` x Prelude.&& True
     it "checks equality on numbers" $
       property $ \x -> eval is0CCC x `shouldBe` x Prelude.== 0
+    it "can compile combinatory Logic (S K K) = id" $
+       property $ \x -> eval idCCC' x `shouldBe` x

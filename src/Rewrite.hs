@@ -131,7 +131,7 @@ goDown _ _ = Nothing -- can't go down
 rewrite' :: [Rule] -> [Rule] -> FreeCat a b -> FreeCat a b
 rewrite' _ [] k = k -- no rules matched
 rewrite' allrules (rule : rules) k = case recurseMatch maxDepth rule k of
-  Nothing -> rewrite' allrules rules k -- try the next rule
+  Nothing -> rewrite' allrules rules k     -- try the next rule
   Just k' -> rewrite' allrules allrules k' -- start over from the beginning
 
 rewrite :: [Rule] -> FreeCat a b -> FreeCat a b
