@@ -8,10 +8,11 @@ import           FreeCat
 import           Interpreter
 import           Prelude         (Bool (..), Double, Float, Int, Num, Integer, abs,
                                   id, negate, uncurry, ($), (&&), (*), (+), (-),
-                                  (.), (==))
+                                  (.), (==), show)
 import           Rewrite
 import           Test.Hspec
 import           Test.QuickCheck
+import Control.Arrow ((&&&))
 
 idCCC :: FreeCat Int Int
 idCCC = simplify . toCCC $ id
@@ -81,3 +82,7 @@ spec = do
       property $ \x -> eval is0CCC x `shouldBe` x Prelude.== 0
     it "can compile combinatory Logic (S K K) = id" $
        property $ \x -> eval idCCC' x `shouldBe` x
+    it "compiles K to Curry Fst" $
+       show(simplify (toCCC k)) `shouldBe` "Curry Fst"
+    it "can evaluate K" $   
+       property $ \x -> eval (eval (toCCC k) x) 8 `shouldBe` (x :: Integer)

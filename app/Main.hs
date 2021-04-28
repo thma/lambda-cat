@@ -21,8 +21,8 @@ import           Rewrite
 mapTuple :: (Data a, Typeable b) => (b -> b) -> a -> a
 mapTuple f = gmapT (mkT f)
 
-ccc :: (FreeCat a a -> FreeCat a b) -> FreeCat a b
-ccc = simplify . toCCC @FreeCat
+--ccc :: (FreeCat a a -> FreeCat a b) -> FreeCat a b
+ccc x = simplify $ toCCC x
 
 --
 main :: IO ()
@@ -293,4 +293,6 @@ cId = s k k
 ccId :: FreeCat b b
 ccId = ccc (s k k)
 
+x = Curry Fst 
 
+y = simplify $ toCCC const
