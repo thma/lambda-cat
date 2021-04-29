@@ -3,7 +3,7 @@
 module Hask where
 
 import           Cat
-import           Data.Bifunctor (bimap)
+--import           Data.Bifunctor (bimap)
 
 {--
  This module contains instance definitions of (->) for all required type-classes.

@@ -5,7 +5,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude     #-}
 
-{-# LANGUAGE TypeOperators #-}
 module Cat where
 
 import           Control.Category

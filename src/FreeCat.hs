@@ -7,8 +7,6 @@
 {-# LANGUAGE StandaloneDeriving    #-}
 {-# OPTIONS_GHC -fno-warn-orphans  #-}
 {-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# OPTIONS_GHC -Wno-deferred-type-errors #-}
 
 module FreeCat where
 
