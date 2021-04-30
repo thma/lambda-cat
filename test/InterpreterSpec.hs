@@ -82,7 +82,7 @@ spec = do
       property $ \x -> eval is0CCC x `shouldBe` x Prelude.== 0
     it "can compile combinatory Logic (S K K) = id" $
        property $ \x -> eval idCCC' x `shouldBe` x
-    it "compiles K to Curry Fst" $
-       show(simplify (toCCC k)) `shouldBe` "Curry Fst"
     it "can evaluate K" $   
        property $ \x -> eval (eval (toCCC k) x) 8 `shouldBe` (x :: Integer)
+    it "can evaluate I" $   
+       property $ \x -> eval (toCCC i) x `shouldBe` (x :: Integer)
