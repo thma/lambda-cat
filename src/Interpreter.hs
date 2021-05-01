@@ -10,7 +10,7 @@ import Cat
       NumCat(greC, addC, subC, mulC, leqC, geqC, lesC),
       BoolLike(false, true),
       Monoidal(parC),
-      Cartesian(dupC) )
+      Cartesian(dupC), applyC )
 import FreeCat ( FreeCat(..) )
 import           Hask    ()
 
@@ -24,7 +24,7 @@ eval :: FreeCat a b -> (a -> b)
 eval (Comp f g)   = eval f . eval g
 eval (Par f g)    = parC (eval f) (eval g)
 eval (Curry f)    = Wrap . curry (eval f)
-eval (Uncurry f)  = error "not yet implemented" -- _f (interp f)
+eval (Uncurry f)  = error "not yet implemented" -- _f (eval f)
 eval Apply        = uncurry eval
 eval Id           = id
 eval (IntConst i) = const i
@@ -36,7 +36,6 @@ eval Add          = addC
 eval Sub          = subC
 eval Abs          = abs
 eval Neg          = negate
-eval AddCurry     = \x -> Wrap (x +) -- just an experiment not really needed
 eval Mul          = mulC
 eval (Wrap f)     = f
 eval Eql          = eqlC
@@ -50,50 +49,3 @@ eval Not          = notC
 eval T            = const true
 eval F            = const false
 --eval IfThenElse   = \(test, (f,g)) -> Id
-
--- p x = do
---   printIt x
---   putStr "\n"
-
--- printIt :: FreeCat a b -> IO ()
--- printIt (Comp f g)   = do 
---                           putStr "Comp ("
---                           printIt f 
---                           putStr " "
---                           printIt g
---                           putStr ")"
--- printIt (Par f g)    = do
---                           putStr "Par ("
---                           printIt f 
---                           putStr " "
---                           printIt g
---                           putStr ")"
--- printIt (Curry f)    = do
---                           putStr "Curry "
---                           printIt f 
--- printIt (Uncurry f)  = do
---                           putStr "Uncurry "
---                           printIt f 
--- printIt Apply        = putStr "Apply "
--- printIt Id           = putStr "Id "
--- printIt (IntConst i) = putStr $ "IntConst " ++ show i
--- printIt FromInt      = putStr "FromInt "
--- printIt Fst          = putStr "Fst "
--- printIt Snd          = putStr "Snd "
--- printIt Dup          = putStr "Dup "
--- printIt Add          = putStr "Add "
--- printIt Sub          = putStr "Sub "
--- printIt Abs          = putStr "Abs "
--- printIt Neg          = putStr "Neg "
--- printIt Mul          = putStr "Mul "
--- printIt (Wrap f)     = putStr $"Wrap " ++ show f
--- printIt Eql          = putStr "Eql "
--- printIt Leq          = putStr "Leq "
--- printIt Geq          = putStr "Geq "
--- printIt Les          = putStr "Les "
--- printIt Gre          = putStr "Gre "
--- printIt And          = putStr "And "
--- printIt Or           = putStr "or "
--- printIt Not          = putStr "Not "
--- printIt T            = putStr "T "
--- printIt F            = putStr "F "

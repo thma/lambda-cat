@@ -25,7 +25,6 @@ data FreeCat a b where
   Par :: FreeCat a b -> FreeCat c d -> FreeCat (a, c) (b, d)
   Add :: (Num a) => FreeCat (a, a) a
   Sub :: (Num a) => FreeCat (a, a) a
-  AddCurry :: (Num a) => FreeCat a (FreeCat a a)
   Mul :: (Num a) => FreeCat (a, a) a
   Abs :: (Num a) => FreeCat a a
   Neg :: (Num a) => FreeCat a a
