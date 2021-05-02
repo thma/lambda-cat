@@ -6,30 +6,42 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE StandaloneDeriving    #-}
 {-# OPTIONS_GHC -fno-warn-orphans  #-}
-{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleContexts      #-}                                                                                                                                                                                                                                                                                                                                                                                                                          
+{-# LANGUAGE DeriveDataTypeable    #-}
 
+{-- This module exposes the GADT data type FreeCat which instantiates the type classes 
+    Closed, Cartesian and Category (among others).
+    This makes this data type the ideal compilation target for toCCC.
+    
+    > toCCC @FreeCat (\(x, y) -> x)
+    Comp Fst Id
+--}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE KindSignatures #-}
 module FreeCat where
 
 import           Cat
-import           Control.Category
+--import           Control.Category
 import           Prelude          hiding (id, (.))
+import Data.Data
+
 
 data FreeCat a b where
-  Comp :: FreeCat b c -> FreeCat a b -> FreeCat a c
-  Id :: FreeCat a a
+  Comp :: (Typeable a, Typeable b, Typeable c) => FreeCat b c -> FreeCat a b -> FreeCat a c
+  Id :: (Typeable a) => FreeCat a a
   IntConst :: Integer -> FreeCat a Integer
   FromInt :: (Num b) => FreeCat Integer b
   Fst :: FreeCat (a, b) a
   Snd :: FreeCat (a, b) b
   Dup :: FreeCat a (a, a)
-  Par :: FreeCat a b -> FreeCat c d -> FreeCat (a, c) (b, d)
+  Par :: (Typeable a, Typeable b, Typeable c, Typeable d) => FreeCat a b -> FreeCat c d -> FreeCat (a, c) (b, d)
   Add :: (Num a) => FreeCat (a, a) a
   Sub :: (Num a) => FreeCat (a, a) a
   Mul :: (Num a) => FreeCat (a, a) a
   Abs :: (Num a) => FreeCat a a
   Neg :: (Num a) => FreeCat a a
-  Apply :: FreeCat (FreeCat a b, a) b
-  Curry :: FreeCat (a, b) c -> FreeCat a (FreeCat b c)
+  Apply :: (Typeable a, Typeable b) => FreeCat (FreeCat a b, a) b
+  Curry :: (Typeable a, Typeable b, Typeable c) => FreeCat (a, b) c -> FreeCat a (FreeCat b c)
   Uncurry :: FreeCat a (FreeCat b c) -> FreeCat (a, b) c
   Wrap :: (a -> b) -> FreeCat a b
   Eql :: (EqLike a b, BoolLike b) => FreeCat (a, a) b
@@ -43,7 +55,7 @@ data FreeCat a b where
   Not :: (BoolLike a) => FreeCat a a
   T :: (BoolLike a) => FreeCat b a
   F :: (BoolLike a) => FreeCat b a
-  IfThenElse :: (BoolLike test) => FreeCat (test, (FreeCat b c, FreeCat b c)) (FreeCat b c)
+  --IfThenElse :: (BoolLike test) => FreeCat (test, (FreeCat b c, FreeCat b c)) (FreeCat b c)
 
 instance Closed FreeCat where
   applyC = Apply
@@ -55,6 +67,10 @@ instance Show (a -> b) where
   showsPrec _ _ = showString "<function>"
 
 deriving instance Show (FreeCat a b)
+
+deriving instance Typeable FreeCat
+
+deriving instance Typeable (FreeCat a b)
 
 instance Category FreeCat where
   (.) = Comp
@@ -80,7 +96,7 @@ instance NumCat FreeCat where
   lesC = Les
   greC = Gre
 
-instance (Num a) => Num (FreeCat z a) where
+instance (Num a, Typeable z, Typeable a) => Num (FreeCat z a) where
   f + g = Add . fanC f g
   f * g = Mul . fanC f g
   negate f = Neg . f
@@ -96,10 +112,10 @@ instance BoolCat FreeCat where
   --ifTE :: (BoolLike a) => FreeCat (a, (FreeCat b d, FreeCat b d)) (FreeCat b d)
   --ifTE :: (BoolLike a) => FreeCat (FreeCat (a, (FreeCat b d, FreeCat b d)) b) d
   --ifTE :: FreeCat (a, (FreeCat b d, FreeCat b d)) (FreeCat b d)
-  ifTE = IfThenElse
+  ifTE = undefined--IfThenElse
 
 
-instance (BoolLike b) => BoolLike (FreeCat a b) where
+instance (BoolLike b, Typeable a, Typeable b) => BoolLike (FreeCat a b) where
   f && g = And . fanC f g
   f || g = Or . fanC f g
   not f = Not . f
@@ -111,7 +127,7 @@ instance (BoolLike b) => BoolLike (FreeCat a b) where
 instance EqCat FreeCat where
   eqlC = Eql
 
-instance (BoolLike b, EqLike a b) => EqLike (FreeCat a a) (FreeCat a b) where
+instance (BoolLike b, EqLike a b, Typeable a, Typeable b) => EqLike (FreeCat a a) (FreeCat a b) where
   f == g = Eql . fanC f g
 
 instance EqLike Integer (FreeCat Integer Bool) where

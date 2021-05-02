@@ -9,13 +9,13 @@
 module Main where
 
 import           CCC
-import           Cat
-import           Control.Category
+import Cat ( BoolLike((&&), true), EqLike(..)) 
+import           Hask
 import           Data.Data
 import           Data.Generics.Aliases
 import           FreeCat
 import           Interpreter
-import           Prelude               hiding (id, pred, succ, (&&), (.), (==))
+import           Prelude               hiding (pred, succ, (&&), (==))
 import           Rewrite
 
 mapTuple :: (Data a, Typeable b) => (b -> b) -> a -> a
@@ -47,9 +47,9 @@ main = do
   print example18
   print example19
   print example21
-  print example22
-  print example23
-  print example24
+  -- print example22
+  -- print example23
+  -- print example24
   print example25
   print example26
 
@@ -148,14 +148,14 @@ example21 = simplify $ toCCC f where f = \h g x -> h g x
 -- Wait, why is this working?
 -- And the Num stuff still works.
 -- It's because we have no fans.
-example22 = simplify $ toCCC (\x -> Id . x)
+--example22 = simplify $ toCCC (\x -> Id . x)
 
 -- example22' = simplify $ toCCC (\x -> (Id . x, Id . x)) -- This doesn't work
-example23 = simplify $ toCCC (\(x, y) -> Dup . x)
+--example23 = simplify $ toCCC (\(x, y) -> Dup . x)
 
 -- could define helper functions with preapplied (.). dup = (.) Dup
 -- then (\x -> dup x) looks more nautral
-example24 = simplify $ toCCC (\(x, y) -> dup x) where dup = (.) Dup
+--example24 = simplify $ toCCC (\(x, y) -> dup x) where dup = (.) Dup
 
 example25 = simplify $ toCCC (\(x, y) -> (x, y))
 
@@ -236,11 +236,11 @@ pair :: (Integer, Integer)
 pair = (23, 23)
 
 simple :: (Num a, EqLike a Bool, Eq a) => a -> a
---simple x = 1
+simple 1 = 1
 simple _ = 23
 
 cSimple :: (Num a, EqLike (FreeCat a a) Bool) => FreeCat a a
-cSimple = simplify $ toCCC simple
+cSimple = toCCC simple
 
 cnst :: a -> b -> a
 cnst = const
@@ -258,22 +258,20 @@ mains = do
 
   print (cIs0 :: FreeCat Integer Bool)
 
-  -- print 
-  --   (eval 
-  --     cIs0 
-  --     (0::Integer) :: Bool)
-
   print (eval cEqual pair :: Bool)
 
   print (cIsTrue :: FreeCat Bool Bool)
 
   print (eval cIsTrue True :: Bool)
 
-  print (cSimple :: FreeCat Integer Integer)
+  --print (cSimple :: FreeCat Integer Integer)
 
   print (cCnst :: FreeCat Integer (FreeCat Integer Integer))
 
   print (eval cCnst 78 :: Integer)
+
+  let x = simplify $ toCCC @FreeCat (\(x,y) -> x)--(\(x, y) -> x + y)
+  print x
 
   --print (eval cSimple 1 :: Integer)
 
@@ -293,6 +291,6 @@ cId = s k k
 ccId :: FreeCat b b
 ccId = ccc (s k k)
 
-x = Curry Fst 
+x = Curry Snd
 
 y = simplify $ toCCC const

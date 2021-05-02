@@ -2,25 +2,46 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 
-module Interpreter where
+{-- This module exposes a function eval that takes a (FreeCat a b) expression as input and returns a function
+    of type (a -> b) which is the semantic interpretation of the CCC expression in the (->) category.
 
-import Cat
-    ( EqCat(eqlC),
-      BoolCat(ifTE, andC, orC, notC),
-      NumCat(greC, addC, subC, mulC, leqC, geqC, lesC),
-      BoolLike(false, true),
-      Monoidal(parC),
-      Cartesian(dupC), applyC )
-import FreeCat ( FreeCat(..) )
+    > cccFst = simplify $ toCCC (\(x, y) -> x)
+    > cccFst
+    Fst
+    > :t cccFst
+    cccFst :: FreeCat (a, b) a
+    > fnFst = eval cccFst
+    > :t fnFst
+    fnFst :: (a, b) -> a
+    > fnFst ("hello", "world")
+    "hello"
+
+--}
+{-# LANGUAGE FlexibleContexts #-}
+module Interpreter (eval, ev, fix) where
+
+import           Cat     (BoolCat (andC, ifTE, notC, orC),
+                          BoolLike (false, true), Cartesian (dupC),
+                          EqCat (eqlC), Monoidal (parC),
+                          NumCat (addC, geqC, greC, leqC, lesC, mulC, subC),
+                          applyC)
+import           FreeCat (FreeCat (..))
 import           Hask    ()
+import Data.Data
 
 fix :: (a -> a) -> a
 fix f = let x = f x in x
 
-red :: FreeCat a1 (a2 -> a2) -> a1 -> a2
-red term arg = fix $ eval term arg
+-- red :: FreeCat a1 (a2 -> a2) -> a1 -> a2
+-- red term arg = fix $ eval term arg
 
-eval :: FreeCat a b -> (a -> b)
+--Curry :: FreeCat (a, b) c -> FreeCat a (FreeCat b c)
+
+ev :: FreeCat a (FreeCat b c) -> (a -> b -> c)
+ev (Curry f)    = curry (eval f)
+
+
+eval :: (Typeable a, Typeable b, Typeable (->)) => FreeCat a b -> (a -> b)
 eval (Comp f g)   = eval f . eval g
 eval (Par f g)    = parC (eval f) (eval g)
 eval (Curry f)    = Wrap . curry (eval f)
@@ -48,4 +69,5 @@ eval Or           = orC
 eval Not          = notC
 eval T            = const true
 eval F            = const false
+
 --eval IfThenElse   = \(test, (f,g)) -> Id

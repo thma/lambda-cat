@@ -5,33 +5,37 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude     #-}
 
+{-- This module contains definition of categories that are required for
+    modelling Closed Cartesian Categories.
+--}  
+
 module Cat where
-
-import           Control.Category
+  
+--import           Control.Category
 import           Prelude          hiding (id, (.))
+import Data.Data
 
-{--
-This module contains definition of categories that are required for
-modelling Closed Cartesian Categories.
---}
+class Typeable cat => Category cat where
+  id  :: (Typeable a) => cat a a
+  (.) :: (Typeable a, Typeable b, Typeable c) => cat b c -> cat a b -> cat a c
 
 class Category k => Monoidal k where
-  parC :: k a c -> k b d -> k (a, b) (c, d)
+  parC :: (Typeable a, Typeable b, Typeable c, Typeable d) => k a c -> k b d -> k (a, b) (c, d)
 
 class Monoidal k => Cartesian k where
-  fstC :: k (a, b) a
-  sndC :: k (a, b) b
-  dupC :: k a (a, a)
+  fstC :: (Typeable a, Typeable b) => k (a, b) a
+  sndC :: (Typeable a, Typeable b) => k (a, b) b
+  dupC :: (Typeable a) => k a (a, a)
 
 class Cartesian k => Closed k where
-  applyC   :: k (k a b, a) b
-  curryC   :: k (a, b) c -> k a (k b c)
-  uncurryC :: k a (k b c) -> k (a, b) c
+  applyC   :: (Typeable a, Typeable b) => k (k a b, a) b
+  curryC   :: (Typeable a, Typeable b, Typeable c) => k (a, b) c -> k a (k b c)
+  uncurryC :: (Typeable a, Typeable b, Typeable c) => k a (k b c) -> k (a, b) c
 
-fanC :: Cartesian cat => cat b c -> cat b d -> cat b (c, d)
+fanC :: (Cartesian cat, Typeable b, Typeable c, Typeable d)=> cat b c -> cat b d -> cat b (c, d)
 fanC f g = parC f g . dupC
 
-idC :: Category k => k a a
+idC :: (Category k, Typeable a) => k a a
 idC = id
 
 class Cartesian k => NumCat k where

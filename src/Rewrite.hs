@@ -2,9 +2,20 @@
 {-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Rewrite (simplify) where
+{-- This module exposes a function simplify which takes a FreeCat expression as input and
+    returns an equivalent yet syntactically simplified FreeCat expression.
+    
+    > toCCC @FreeCat (\(x, y) -> x)
+    Comp Fst Id
+    
+    > simplify $ toCCC (\(x, y) -> x)
+    Fst
 
-import Control.Category ((.))
+--}  
+module Rewrite (simplify) where
+  
+--import Control.Category ((.))
+import Cat
 import FreeCat
 import Prelude hiding (id, (.))
 
