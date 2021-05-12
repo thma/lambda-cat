@@ -11,17 +11,13 @@ module Main where
 import           CCC
 import Cat ( BoolLike((&&), true), EqLike(..)) 
 import           Hask
-import           Data.Data
 import           Data.Generics.Aliases
 import           FreeCat
 import           Interpreter
 import           Prelude               hiding (pred, succ, (&&), (==))
 import           Rewrite
 
-mapTuple :: (Data a, Typeable b) => (b -> b) -> a -> a
-mapTuple f = gmapT (mkT f)
-
---ccc :: (FreeCat a a -> FreeCat a b) -> FreeCat a b
+ccc :: (FreeCat a a -> FreeCat a b) -> FreeCat a b
 ccc x = simplify $ toCCC x
 
 --
@@ -47,9 +43,9 @@ main = do
   print example18
   print example19
   print example21
-  -- print example22
-  -- print example23
-  -- print example24
+  --print example22
+  --print example23
+  --print example24
   print example25
   print example26
 

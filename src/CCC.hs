@@ -26,17 +26,16 @@ module CCC (toCCC) where
 
 import           Cat
 import Hask
---import           Control.Category
 import           Prelude          hiding (id, (.))
-import Data.Data
 
-class (Typeable a, Typeable b) => IsTup a b | a -> b
 
-instance {-# INCOHERENT #-} (c ~ 'True, Typeable a, Typeable b) => IsTup (a, b) c
+class IsTup a b | a -> b
 
-instance {-# INCOHERENT #-} (c ~ 'True, Typeable a, Typeable b) => IsTup (a -> b) c
+instance {-# INCOHERENT #-} (c ~ 'True) => IsTup (a, b) c
 
-instance {-# INCOHERENT #-} (b ~ 'False, Typeable a, Typeable b) => IsTup a b
+instance {-# INCOHERENT #-} (c ~ 'True) => IsTup (a -> b) c
+
+instance {-# INCOHERENT #-} (b ~ 'False) => IsTup a b
 
 data Left a
 
@@ -77,19 +76,14 @@ type family Reverse a b where
   Reverse () b = b
 
 class CCC (flag :: Bool) fanindex input out | flag fanindex input -> out where --
-  toCCC' :: (Typeable input, Typeable out) => input -> out
+  toCCC' ::  input -> out
 
 -- toCCC reduces to the case of (stuff) -> single thing that is not -> or (,) curry and fan
 toCCC ::
   forall k a b a' b' fb.
   ( Category k,
     CCC fb () (a -> b) (k a' b'),
-    IsTup b fb,
-    Typeable k,
-    Typeable a,
-    Typeable a',
-    Typeable b,
-    Typeable b'
+    IsTup b fb
   ) =>
   (a -> b) ->
   k a' b'
@@ -100,12 +94,7 @@ instance
     IsTup b fb,
     IsTup c fc,
     CCC fb (Left ind) (a -> b) (k a' b'),
-    CCC fc (Right ind) (a -> c) (k a' c'),
-    Typeable k,
-    Typeable a,
-    Typeable a',
-    Typeable b',
-    Typeable c'
+    CCC fc (Right ind) (a -> c) (k a' c')
   ) =>
   CCC 'True ind (a -> (b, c)) (k a' (b', c'))
   where
@@ -115,13 +104,7 @@ instance
 instance
   ( Closed k,
     IsTup c fc,
-    CCC fc ind ((a, b) -> c) (k (a', b') c'),
-    Typeable k,
-    Typeable a,
-    Typeable a',
-    Typeable b,
-    Typeable b',
-    Typeable c'
+    CCC fc ind ((a, b) -> c) (k (a', b') c')
   ) =>
   CCC 'True ind (a -> (b -> c)) (k a' (k b' c'))
   where
@@ -134,9 +117,7 @@ instance
     IsTup a fa,
     BuildInput a fa ind' (k a' a'),
     ind' ~ Reverse ind (),
-    EitherTree ind' (k a' b') b, -- (k a' b') ~ b
-    --Typeable  k,
-    Typeable a'
+    EitherTree ind' (k a' b') b -- (k a' b') ~ b
   ) =>
   CCC 'False ind (a -> b) (k a' b')
   where
@@ -154,10 +135,7 @@ instance
     IsTup b fb,
     BuildInput a fa ind (k x a'),
     BuildInput b fb ind (k x b'),
-    (k x (a', b') ~ cat),
-    Typeable x,
-    Typeable a',
-    Typeable b'
+    (k x (a', b') ~ cat)
   ) =>
   BuildInput (a, b) 'True ind cat
   where
@@ -174,12 +152,7 @@ instance
     cat'' ~ k x b', -- the type of path'
     IsTup b fb,
     IsTup a fa,
-    BuildInput b fb ind cat'',
-    Typeable k,
-    Typeable x,
-    Typeable a',
-    Typeable b'
-
+    BuildInput b fb ind cat''
   ) =>
   BuildInput (a -> b) 'True ind cat -- toCCC x?
   -- path is location of input morphism in question inside of tuple
@@ -206,11 +179,7 @@ class FanOutput (flag :: Bool) out cat | out flag -> cat where
 instance
   ( Category k,
     IsTup b fb,
-    CCC fb () (a -> b) (k a' b'),
-    Typeable k,
-    Typeable a,
-    Typeable a',
-    Typeable b'
+    CCC fb () (a -> b) (k a' b')
   ) =>
   FanOutput 'True (a -> b) (k a' b')
   where
@@ -225,11 +194,7 @@ instance
     IsTup b fb,
     FanOutput fa a (k x a'),
     FanOutput fb b (k x b'),
-    k x (a', b') ~ cat,
-    Typeable k,
-    Typeable x,
-    Typeable a',
-    Typeable b'
+    k x (a', b') ~ cat
   ) =>
   FanOutput 'True (a, b) cat
   where

@@ -27,7 +27,6 @@ import           Cat     (BoolCat (andC, ifTE, notC, orC),
                           applyC)
 import           FreeCat (FreeCat (..))
 import           Hask    ()
-import Data.Data
 
 fix :: (a -> a) -> a
 fix f = let x = f x in x
@@ -35,13 +34,13 @@ fix f = let x = f x in x
 -- red :: FreeCat a1 (a2 -> a2) -> a1 -> a2
 -- red term arg = fix $ eval term arg
 
---Curry :: FreeCat (a, b) c -> FreeCat a (FreeCat b c)
+
 
 ev :: FreeCat a (FreeCat b c) -> (a -> b -> c)
 ev (Curry f)    = curry (eval f)
 
 
-eval :: (Typeable a, Typeable b, Typeable (->)) => FreeCat a b -> (a -> b)
+eval :: FreeCat a b -> (a -> b)
 eval (Comp f g)   = eval f . eval g
 eval (Par f g)    = parC (eval f) (eval g)
 eval (Curry f)    = Wrap . curry (eval f)

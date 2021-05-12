@@ -7,8 +7,8 @@ import           Cat
 import           FreeCat
 import           Interpreter
 import           Prelude         (Bool (..), Double, Float, Int, Num, Integer, abs,
-                                  id, negate, uncurry, ($), (&&), (*), (+), (-),
-                                  (.), (==), show)
+                                  negate, uncurry, ($), (&&), (*), (+), (-),
+                                  (==), show)
 import           Rewrite
 import           Test.Hspec
 import           Test.QuickCheck
