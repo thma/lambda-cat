@@ -6,13 +6,6 @@
 
 
 
-## disclaimer: 
-
-This code is heavily based on Philip Zuckers 
-[http://www.philipzucker.com/compiling-to-categories-3-a-bit-cuter/](http://www.philipzucker.com/compiling-to-categories-3-a-bit-cuter/)
-
-I forked from a [specific branch of his repository](https://github.com/philzook58/not-bad-ccc/tree/fan2).
-All the really complicated stuff is his invention. I just filled the blanks, cleaned up the code a bit and added an interpreter that executes CCC code.
 
 
 ## Introduction
@@ -64,7 +57,15 @@ apply :: (a -> b, a) -> b
 apply (f, x) = f x
 ```
 
-## the bool issue
+## Conal's GHC plugin 
 
-I'm currently stuck with a tricky type class issue.
-I'm trying to instantiate 
+## Philip Zuckers 
+
+
+## disclaimer:
+
+This code is based on Philip Zuckers
+[http://www.philipzucker.com/compiling-to-categories-3-a-bit-cuter/](http://www.philipzucker.com/compiling-to-categories-3-a-bit-cuter/)
+
+I forked from a [specific branch of his repository](https://github.com/philzook58/not-bad-ccc/tree/fan2).
+All the really complicated stuff is his invention. I just filled the blanks, cleaned up the code a bit and added an interpreter that executes CCC code.
