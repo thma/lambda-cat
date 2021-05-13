@@ -11,13 +11,13 @@
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeOperators          #-}
 {-# LANGUAGE UndecidableInstances   #-}
-{-# OPTIONS_GHC -fno-warn-orphans   #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
-{-- This module contains exposes a compilation function toCCC, which takes a function as input and returns a closed 
+{-- This module contains exposes a compilation function toCCC, which takes a function as input and returns a closed
     cartesian category representation of that function.
-    
+
     In a typical use case you will use the GADT data type FreeCat as a compilation target:
-    
+
     > toCCC @FreeCat (\(x, y) -> x)
     Comp Fst Id
 --}
@@ -25,9 +25,8 @@
 module CCC (toCCC) where
 
 import           Cat
-import Hask
-import           Prelude          hiding (id, (.))
-
+import           Hask    ()
+import           Prelude hiding (id, (.))
 
 class IsTup a b | a -> b
 
@@ -76,7 +75,7 @@ type family Reverse a b where
   Reverse () b = b
 
 class CCC (flag :: Bool) fanindex input out | flag fanindex input -> out where --
-  toCCC' ::  input -> out
+  toCCC' :: input -> out
 
 -- toCCC reduces to the case of (stuff) -> single thing that is not -> or (,) curry and fan
 toCCC ::

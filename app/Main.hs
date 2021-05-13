@@ -1,18 +1,18 @@
+{-# LANGUAGE AllowAmbiguousTypes       #-}
 {-# LANGUAGE FlexibleContexts          #-}
+{-# LANGUAGE MonoLocalBinds            #-}
 {-# LANGUAGE NoImplicitPrelude         #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE PartialTypeSignatures     #-}
 {-# LANGUAGE TypeApplications          #-}
-{-# LANGUAGE MonoLocalBinds #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module Main where
 
 import           CCC
-import Cat ( BoolLike((&&), true), EqLike(..)) 
-import           Hask
+import           Cat                   (BoolLike (true, (&&)), EqLike (..))
 import           Data.Generics.Aliases
 import           FreeCat
+import           Hask
 import           Interpreter
 import           Prelude               hiding (pred, succ, (&&), (==))
 import           Rewrite
@@ -174,19 +174,18 @@ test _ = 0
 
 example30 = ccc test
 
-
 --------------------
 
 --fact = fix (\f n -> (isZero n) 1 (* n (f (n - 1))))
 
-iff :: (BoolLike b, EqLike b Bool) => (b,p,p) -> p
-iff (test,r,f) = if test == true then r else f
+iff :: (BoolLike b, EqLike b Bool) => (b, p, p) -> p
+iff (test, r, f) = if test == true then r else f
 
 --cIf :: BoolLike a => FreeCat a (FreeCat b (FreeCat b b))
 --cIf :: FreeCat a' (FreeCat b' (FreeCat b' b'))
 --cIf = simplify $ toCCC iff
 
-isZero :: (EqLike a b, Num a, BoolLike  b) => p -> a -> b
+isZero :: (EqLike a b, Num a, BoolLike b) => p -> a -> b
 isZero x = (== 0)
 
 cIsZero :: (EqLike (FreeCat (a', b') b') (FreeCat (a', b') c'), Num b') => FreeCat a' (FreeCat b' c')
@@ -213,9 +212,8 @@ cAnd = simplify $ toCCC (uncurry (&&))
 --cFact :: (Ord (FreeCat a' a'), Num a') => FreeCat a' a'
 --cFact = simplify $ toCCC fact
 
-
 eql :: EqLike a b => (a, a) -> b
-eql (x,y) = x == y
+eql (x, y) = x == y
 
 --cEqual :: (BoolLike a, EqLike (b, b) (FreeCat (b, b) a)) => FreeCat (b, b) a
 --cEqual :: EqLike (FreeCat (b', b') b') (FreeCat (b', b') b) => FreeCat (b', b') b
@@ -246,7 +244,6 @@ cCnst = simplify $ toCCC (cnst 7)
 
 mains :: IO ()
 mains = do
-
   print (simple 4 :: Integer)
 
   print (is0 (78 :: Integer) :: Bool)
@@ -266,11 +263,10 @@ mains = do
 
   print (eval cCnst 78 :: Integer)
 
-  let x = simplify $ toCCC @FreeCat (\(x,y) -> x)--(\(x, y) -> x + y)
+  let x = simplify $ toCCC @FreeCat (\(x, y) -> x) --(\(x, y) -> x + y)
   print x
 
-  --print (eval cSimple 1 :: Integer)
-
+--print (eval cSimple 1 :: Integer)
 
 i :: a -> a
 i x = x
@@ -279,7 +275,7 @@ k :: a -> b -> a
 k y _ = y
 
 s :: (a -> b -> c) -> (a -> b) -> a -> c
-s p q x = p x (q x)  
+s p q x = p x (q x)
 
 cId :: a -> a
 cId = s k k

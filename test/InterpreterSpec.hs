@@ -12,7 +12,6 @@ import           Prelude         (Bool (..), Double, Float, Int, Num, Integer, a
 import           Rewrite
 import           Test.Hspec
 import           Test.QuickCheck
-import Control.Arrow ((&&&))
 
 idCCC :: FreeCat Int Int
 idCCC = simplify . toCCC $ id

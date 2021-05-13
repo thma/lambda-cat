@@ -1,7 +1,3 @@
-{-# LANGUAGE GADTs                 #-}
-{-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-
 {-- This module exposes a function eval that takes a (FreeCat a b) expression as input and returns a function
     of type (a -> b) which is the semantic interpretation of the CCC expression in the (->) category.
 
@@ -17,7 +13,11 @@
     "hello"
 
 --}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
+
 module Interpreter (eval, ev, fix) where
 
 import           Cat     (BoolCat (andC, ifTE, notC, orC),
@@ -34,11 +34,8 @@ fix f = let x = f x in x
 -- red :: FreeCat a1 (a2 -> a2) -> a1 -> a2
 -- red term arg = fix $ eval term arg
 
-
-
 ev :: FreeCat a (FreeCat b c) -> (a -> b -> c)
-ev (Curry f)    = curry (eval f)
-
+ev (Curry f) = curry (eval f)
 
 eval :: FreeCat a b -> (a -> b)
 eval (Comp f g)   = eval f . eval g
