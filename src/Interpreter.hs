@@ -40,7 +40,7 @@ ev (Curry f) = curry (eval f)
 eval :: FreeCat a b -> (a -> b)
 eval (Comp f g)   = eval f . eval g
 eval (Par f g)    = parC (eval f) (eval g)
-eval (Curry f)    = Wrap . curry (eval f)
+eval (Curry f)    = Lift . curry (eval f)
 eval (Uncurry f)  = error "not yet implemented" -- _f (eval f)
 eval Apply        = uncurry eval
 eval Id           = id
@@ -54,7 +54,7 @@ eval Sub          = subC
 eval Abs          = abs
 eval Neg          = negate
 eval Mul          = mulC
-eval (Wrap f)     = f
+eval (Lift f)     = f
 eval Eql          = eqlC
 eval Leq          = leqC
 eval Geq          = geqC

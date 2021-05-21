@@ -42,7 +42,7 @@ data FreeCat a b where
   Apply :: FreeCat (FreeCat a b, a) b
   Curry :: FreeCat (a, b) c -> FreeCat a (FreeCat b c)
   Uncurry :: FreeCat a (FreeCat b c) -> FreeCat (a, b) c
-  Wrap :: (a -> b) -> FreeCat a b
+  Lift :: (a -> b) -> FreeCat a b
   Eql :: (EqLike a b, BoolLike b) => FreeCat (a, a) b
   Leq :: (Ord a, BoolLike b) => FreeCat (a, a) b
   Geq :: (Ord a, BoolLike b) => FreeCat (a, a) b
