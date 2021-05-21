@@ -56,4 +56,3 @@ interp Or           = orC
 interp Not          = notC
 interp T            = const true
 interp F            = const false
-
