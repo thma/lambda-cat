@@ -51,7 +51,7 @@ main = do
 
   --print fac
 
-  let x = eval fac 10
+  let x = interp fac 10
   print 10
 
   mains
@@ -174,10 +174,6 @@ test _ = 0
 
 example30 = ccc test
 
---------------------
-
---fact = fix (\f n -> (isZero n) 1 (* n (f (n - 1))))
-
 iff :: (BoolLike b, EqLike b Bool) => (b, p, p) -> p
 iff (test, r, f) = if test == true then r else f
 
@@ -196,6 +192,9 @@ isTrue x = true && x
 
 cIsTrue :: BoolLike a => FreeCat a a
 cIsTrue = simplify $ toCCC isTrue
+
+fix :: (a -> a) -> a
+fix f = let x = f x in x
 
 cFix :: FreeCat (FreeCat a' a') a'
 cFix = simplify $ toCCC fix
@@ -247,21 +246,21 @@ mains = do
   print (simple 4 :: Integer)
 
   print (is0 (78 :: Integer) :: Bool)
-  print (eval (cIs0 :: FreeCat Integer Bool) 8)
+  print (interp (cIs0 :: FreeCat Integer Bool) 8)
 
   print (cIs0 :: FreeCat Integer Bool)
 
-  print (eval cEqual pair :: Bool)
+  print (interp cEqual pair :: Bool)
 
   print (cIsTrue :: FreeCat Bool Bool)
 
-  print (eval cIsTrue True :: Bool)
+  print (interp cIsTrue True :: Bool)
 
   --print (cSimple :: FreeCat Integer Integer)
 
   print (cCnst :: FreeCat Integer (FreeCat Integer Integer))
 
-  print (eval cCnst 78 :: Integer)
+  print (interp cCnst 78 :: Integer)
 
   let x = simplify $ toCCC @FreeCat (\(x, y) -> x) --(\(x, y) -> x + y)
   print x

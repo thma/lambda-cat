@@ -60,28 +60,28 @@ spec :: Spec
 spec = do
   describe "The CCC Interpreter" $ do
     it "interpretes the id function" $
-      property $ \x -> eval idCCC x `shouldBe` x
+      property $ \x -> interp idCCC x `shouldBe` x
     it "interpretes addition" $
-      property $ \x y -> eval addCCC (x, y) `shouldBe` x + y
+      property $ \x y -> interp addCCC (x, y) `shouldBe` x + y
     it "interpretes multiplication" $
-      property $ \x y -> eval mulCCC (x, y) `shouldBe` x * y
+      property $ \x y -> interp mulCCC (x, y) `shouldBe` x * y
     it "interpretes substraction" $
-      property $ \x y -> eval subCCC (x, y) `shouldBe` x - y
+      property $ \x y -> interp subCCC (x, y) `shouldBe` x - y
     it "interpretes negation" $
-      property $ \x -> eval negCCC x `shouldBe` negate x
+      property $ \x -> interp negCCC x `shouldBe` negate x
     it "interpretes absolute" $
-      property $ \x -> eval absCCC x `shouldBe` abs x
+      property $ \x -> interp absCCC x `shouldBe` abs x
     it "interpretes combination of + and *" $
-      property $ \x y -> eval example6 (x, y) `shouldBe` (\(a, b) -> (b + (a * b), a * b)) (x, y)
+      property $ \x y -> interp example6 (x, y) `shouldBe` (\(a, b) -> (b + (a * b), a * b)) (x, y)
     it "interpretes partial evaluated functions" $
-      property $ \x -> eval add2CCC x `shouldBe` x + 2
+      property $ \x -> interp add2CCC x `shouldBe` x + 2
     it "interpretes partial evaluated functions with booleans" $
-      property $ \x -> eval isTrueCCC x `shouldBe` x Prelude.&& True
+      property $ \x -> interp isTrueCCC x `shouldBe` x Prelude.&& True
     it "checks equality on numbers" $
-      property $ \x -> eval is0CCC x `shouldBe` x Prelude.== 0
+      property $ \x -> interp is0CCC x `shouldBe` x Prelude.== 0
     it "can compile combinatory Logic (S K K) = id" $
-       property $ \x -> eval idCCC' x `shouldBe` x
+       property $ \x -> interp idCCC' x `shouldBe` x
     it "can evaluate K" $   
-       property $ \x -> eval (eval (toCCC k) x) 8 `shouldBe` (x :: Integer)
+       property $ \x -> interp (interp (toCCC k) x) 8 `shouldBe` (x :: Integer)
     it "can evaluate I" $   
-       property $ \x -> eval (toCCC i) x `shouldBe` (x :: Integer)
+       property $ \x -> interp (toCCC i) x `shouldBe` (x :: Integer)
