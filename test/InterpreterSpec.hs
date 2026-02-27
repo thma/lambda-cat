@@ -104,23 +104,58 @@ spec = do
     -- Tests for Fix (recursive functions)
     -- Fix takes a morphism (a -> a) and returns the fixpoint
     it "computes countdown via fix" $
-      let countdownStep :: FreeCat Integer Integer -> FreeCat Integer Integer
-          countdownStep rec = Lift $ \n -> if n Prelude.== 0 then 0 else interp rec (n - 1)
+      let -- CCC morphisms for arithmetic and comparison
+          isZero    = Comp Eql (fanC Id (IntConst 0)) :: FreeCat Integer Bool
+          decrement = Comp Sub (fanC Id (IntConst 1)) :: FreeCat Integer Integer  -- n -> n - 1
+
+          countdownStep :: FreeCat Integer Integer -> FreeCat Integer Integer
+          countdownStep rec = Lift $ \n ->
+            if interp isZero n then 0 else interp rec (interp decrement n)
           -- interp Fix returns a FreeCat, so we need interp again to get a function
           countdown = interp (interp Fix (Lift countdownStep))
       in countdown 10 `shouldBe` 0
 
     it "computes factorial via fix" $
-      let facStep :: FreeCat Integer Integer -> FreeCat Integer Integer
-          facStep rec = Lift $ \n -> if n Prelude.== 0 then 1 else n * interp rec (n - 1)
+      let isZero    = Comp Eql (fanC Id (IntConst 0)) :: FreeCat Integer Bool
+          decrement = Comp Sub (fanC Id (IntConst 1)) :: FreeCat Integer Integer
+
+          facStep :: FreeCat Integer Integer -> FreeCat Integer Integer
+          facStep rec = Lift $ \n ->
+            if interp isZero n
+            then 1
+            else interp Mul (n, interp rec (interp decrement n))  -- n * rec(n-1)
+          factorial = interp (interp Fix (Lift facStep))
+      in factorial 5 `shouldBe` 120
+
+    -- Factorial using IfThenElse and Eql from the CCC structure
+    it "computes factorial via fix using IfThenElse" $
+      let -- CCC morphisms
+          isZeroCCC :: FreeCat Integer Bool
+          isZeroCCC = Comp Eql (fanC Id (IntConst 0))
+          decrement = Comp Sub (fanC Id (IntConst 1)) :: FreeCat Integer Integer
+
+          facStep :: FreeCat Integer Integer -> FreeCat Integer Integer
+          facStep rec = Lift $ \n ->
+            let isZero = interp isZeroCCC n
+                thenBranch = IntConst 1
+                elseBranch = Lift $ \m ->
+                  interp Mul (m, interp rec (interp decrement m))
+                selectedBranch = interp IfThenElse (isZero, (thenBranch, elseBranch))
+            in interp selectedBranch n
           factorial = interp (interp Fix (Lift facStep))
       in factorial 5 `shouldBe` 120
 
     it "computes fibonacci via fix" $
-      let fibStep :: FreeCat Integer Integer -> FreeCat Integer Integer
+      let -- CCC morphisms for comparisons and arithmetic
+          isZero = Comp Eql (fanC Id (IntConst 0)) :: FreeCat Integer Bool
+          isOne  = Comp Eql (fanC Id (IntConst 1)) :: FreeCat Integer Bool
+          dec1   = Comp Sub (fanC Id (IntConst 1)) :: FreeCat Integer Integer  -- n - 1
+          dec2   = Comp Sub (fanC Id (IntConst 2)) :: FreeCat Integer Integer  -- n - 2
+
+          fibStep :: FreeCat Integer Integer -> FreeCat Integer Integer
           fibStep rec = Lift $ \n ->
-            if n Prelude.== 0 then 0
-            else if n Prelude.== 1 then 1
-            else interp rec (n - 1) + interp rec (n - 2)
+            if interp isZero n then 0
+            else if interp isOne n then 1
+            else interp Add (interp rec (interp dec1 n), interp rec (interp dec2 n))
           fib = interp (interp Fix (Lift fibStep))
       in fib 10 `shouldBe` 55
