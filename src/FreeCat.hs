@@ -54,8 +54,10 @@ data FreeCat a b where
   Not :: (BoolLike a) => FreeCat a a
   T :: (BoolLike a) => FreeCat b a
   F :: (BoolLike a) => FreeCat b a
-
---IfThenElse :: (BoolLike test) => FreeCat (test, (FreeCat b c, FreeCat b c)) (FreeCat b c)
+  -- Conditional branching: selects between two morphisms based on a boolean
+  IfThenElse :: FreeCat (Bool, (FreeCat b c, FreeCat b c)) (FreeCat b c)
+  -- Fixpoint combinator for recursive definitions (Y-combinator)
+  Fix :: FreeCat (FreeCat a a) a
 
 instance Closed FreeCat where
   applyC = Apply
@@ -106,10 +108,7 @@ instance BoolCat FreeCat where
   orC = Or
   notC = Not
 
-  --ifTE :: (BoolLike a) => FreeCat (a, (FreeCat b d, FreeCat b d)) (FreeCat b d)
-  --ifTE :: (BoolLike a) => FreeCat (FreeCat (a, (FreeCat b d, FreeCat b d)) b) d
-  --ifTE :: FreeCat (a, (FreeCat b d, FreeCat b d)) (FreeCat b d)
-  ifTE = undefined --IfThenElse
+  ifTE = IfThenElse
 
 instance (BoolLike b) => BoolLike (FreeCat a b) where
   f && g = And . fanC f g

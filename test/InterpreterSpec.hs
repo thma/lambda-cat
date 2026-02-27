@@ -83,5 +83,44 @@ spec = do
        property $ \x -> interp idCCC' x `shouldBe` x
     it "can evaluate K" $   
        property $ \x -> interp (interp (toCCC k) x) 8 `shouldBe` (x :: Integer)
-    it "can evaluate I" $   
+    it "can evaluate I" $
        property $ \x -> interp (toCCC i) x `shouldBe` (x :: Integer)
+
+    -- Tests for Uncurry
+    it "interprets uncurried functions" $
+      let curriedAdd = toCCC (+) :: FreeCat Integer (FreeCat Integer Integer)
+          uncurriedAdd = Uncurry curriedAdd
+      in property $ \x y -> interp uncurriedAdd (x, y) `shouldBe` x + y
+
+    -- Tests for IfThenElse
+    it "interprets if-then-else with True" $
+      let test = interp IfThenElse (True, (Add, Sub))
+      in interp test (3, 2) `shouldBe` 5
+
+    it "interprets if-then-else with False" $
+      let test = interp IfThenElse (False, (Add, Sub))
+      in interp test (3, 2) `shouldBe` 1
+
+    -- Tests for Fix (recursive functions)
+    -- Fix takes a morphism (a -> a) and returns the fixpoint
+    it "computes countdown via fix" $
+      let countdownStep :: FreeCat Integer Integer -> FreeCat Integer Integer
+          countdownStep rec = Lift $ \n -> if n Prelude.== 0 then 0 else interp rec (n - 1)
+          -- interp Fix returns a FreeCat, so we need interp again to get a function
+          countdown = interp (interp Fix (Lift countdownStep))
+      in countdown 10 `shouldBe` 0
+
+    it "computes factorial via fix" $
+      let facStep :: FreeCat Integer Integer -> FreeCat Integer Integer
+          facStep rec = Lift $ \n -> if n Prelude.== 0 then 1 else n * interp rec (n - 1)
+          factorial = interp (interp Fix (Lift facStep))
+      in factorial 5 `shouldBe` 120
+
+    it "computes fibonacci via fix" $
+      let fibStep :: FreeCat Integer Integer -> FreeCat Integer Integer
+          fibStep rec = Lift $ \n ->
+            if n Prelude.== 0 then 0
+            else if n Prelude.== 1 then 1
+            else interp rec (n - 1) + interp rec (n - 2)
+          fib = interp (interp Fix (Lift fibStep))
+      in fib 10 `shouldBe` 55

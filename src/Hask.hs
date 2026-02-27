@@ -34,11 +34,11 @@ instance NumCat (->) where
   addC = uncurry (+)
   subC = uncurry (-)
   absC = abs
-
---  leqC = uncurry (<=)
---  geqC = uncurry (>=)
---  lesC = uncurry (<)
---  greC = uncurry (>)
+  -- Need explicit type annotations since BoolLike is polymorphic
+  leqC (x, y) = if x <= y then true else false
+  geqC (x, y) = if x >= y then true else false
+  lesC (x, y) = if x < y then true else false
+  greC (x, y) = if x > y then true else false
 
 instance BoolCat (->) where
   andC = uncurry (Cat.&&)

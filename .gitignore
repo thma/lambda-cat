@@ -30,3 +30,5 @@ stack.yaml.lock
 .vscode/tasks.json
 .vscode/phoityne.log
 .vscode/launch.json
+.claude/*
+CLAUDE.md

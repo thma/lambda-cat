@@ -32,7 +32,7 @@ interp :: FreeCat a b -> (a -> b)
 interp (Comp f g)   = interp f . interp g
 interp (Par f g)    = parC (interp f) (interp g)
 interp (Curry f)    = Lift . curry (interp f)
-interp (Uncurry f)  = error "not yet implemented" -- _f (interp f)
+interp (Uncurry f)  = \(a, b) -> interp (interp f a) b
 interp Apply        = uncurry interp
 interp Id           = id
 interp (IntConst i) = const i
@@ -56,3 +56,9 @@ interp Or           = orC
 interp Not          = notC
 interp T            = const true
 interp F            = const false
+-- Conditional selects between two branches based on boolean test
+interp IfThenElse   = \(test, (thenBranch, elseBranch)) ->
+  if test then thenBranch else elseBranch
+-- Fixpoint uses Haskell's lazy evaluation to compute the recursive result
+interp Fix          = \morphism ->
+  let result = interp morphism result in result

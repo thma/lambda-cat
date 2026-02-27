@@ -35,13 +35,13 @@ main = do
   print example10
   print example11
   print example12
-  print example13
+  --print example13
   print example14
   print example15
   print example16
   print example17
   print example18
-  print example19
+  --print example19
   print example21
   --print example22
   --print example23
@@ -98,7 +98,7 @@ example12 = simplify $ toCCC ((\x y -> y) :: a -> b -> b)
 --example16 =  toCCC ((\x y -> y)) -- :: _ -> _ -> _)
 example12' = simplify $ toCCC (\x -> (x, x))
 
-example13 = simplify $ toCCC (\x y -> (x, y))
+--example13 = simplify $ toCCC (\x y -> (x, y))
 
 example14 = simplify $ toCCC f where f = (\x y z -> z)
 
@@ -117,7 +117,7 @@ example17 = simplify $ toCCC (*)
 
 example18 = simplify $ toCCC f where f = \g x -> g x
 
-example19 = simplify $ toCCC (\(g, x) -> g x)
+--example19 = simplify $ toCCC (\(g, x) -> g x)
 
 -- fails confusingly. This might mean something is fundmanetally wrong somehwere.
 -- This may be failing because it tries to toCCC const as an itermediate step, which we've already

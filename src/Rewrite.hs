@@ -91,6 +91,10 @@ allRules =
     ruleParen
   ]
 
+-- Note: Rewrite rules for IfThenElse (if True => f, if False => g)
+-- are complex due to GADT type constraints. These could be added
+-- later with appropriate type witnesses.
+
 maxDepth :: Int
 maxDepth = 1000
 
