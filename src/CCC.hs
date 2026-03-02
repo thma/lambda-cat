@@ -13,8 +13,8 @@
 {-# LANGUAGE UndecidableInstances   #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-{-- This module contains exposes a compilation function toCCC, which takes a function as input and returns a closed
-    cartesian category representation of that function.
+{-- This module exposes a compilation function toCCC, which takes a function as input 
+    and returns a closed cartesian category representation of that function.
 
     In a typical use case you will use the GADT data type FreeCat as a compilation target:
 
@@ -158,7 +158,9 @@ instance
   -- x may be a tuple to be deconstructed
   -- or x may be arrow to be toCCC ed
   where
-  buildInput path = \x -> let path' = applyC . fanC path (fanOutput @fa x) in buildInput @b @fb @ind path'
+    buildInput path x = 
+      let path' = applyC . fanC path (fanOutput @fa x) 
+      in buildInput @b @fb @ind path'
 
 instance
   ( Category k, --,
@@ -167,7 +169,7 @@ instance
   ) =>
   BuildInput a 'False ind b
   where
-  buildInput path = inj @ind path
+  buildInput = inj @ind
 
 -- Does FanOput even need the flag?
 -- isn't it all directed now?
@@ -182,7 +184,7 @@ instance
   ) =>
   FanOutput 'True (a -> b) (k a' b')
   where
-  fanOutput f = toCCC' @fb @() f
+  fanOutput = toCCC' @fb @()
 
 instance (Category k, kab ~ k a b) => FanOutput 'False kab (k a b) where
   fanOutput f = f

@@ -56,9 +56,13 @@ interp Or           = orC
 interp Not          = notC
 interp T            = const true
 interp F            = const false
--- Conditional selects between two branches based on boolean test
+-- Conditional selects between two morphisms based on boolean test
 interp IfThenElse   = \(test, (thenBranch, elseBranch)) ->
   if test then thenBranch else elseBranch
--- Fixpoint uses Haskell's lazy evaluation to compute the recursive result
-interp Fix          = \morphism ->
-  let result = interp morphism result in result
+-- Value-level conditional: selects between two values based on boolean
+interp IfVal        = \(test, (thenVal, elseVal)) ->
+  if test then thenVal else elseVal
+-- Fixpoint: step function is a FreeCat morphism, recursion stays categorical
+interp (Fix step)   = \a ->
+  let rec = Fix step  -- the recursive call is the Fix itself
+  in interp step (rec, a)

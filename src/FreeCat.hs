@@ -56,8 +56,11 @@ data FreeCat a b where
   F :: (BoolLike a) => FreeCat b a
   -- Conditional branching: selects between two morphisms based on a boolean
   IfThenElse :: FreeCat (Bool, (FreeCat b c, FreeCat b c)) (FreeCat b c)
-  -- Fixpoint combinator for recursive definitions (Y-combinator)
-  Fix :: FreeCat (FreeCat a a) a
+  -- Value-level conditional: selects between two values based on a boolean
+  IfVal :: FreeCat (Bool, (a, a)) a
+  -- Fixpoint combinator for recursive definitions
+  -- Takes a step function (rec, input) -> output and produces the fixed point
+  Fix :: FreeCat (FreeCat a b, a) b -> FreeCat a b
 
 instance Closed FreeCat where
   applyC = Apply
