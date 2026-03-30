@@ -11,13 +11,13 @@ module Main where
 import           CCC
 import           Cat                   (BoolLike (true, (&&)), EqLike (..))
 import           Data.Generics.Aliases
-import           FreeCat
+import           CatExpr
 import           Hask
 import           Interpreter
 import           Prelude               hiding (pred, succ, (&&), (==))
 import           Rewrite
 
-ccc :: (FreeCat a a -> FreeCat a b) -> FreeCat a b
+ccc :: (CatExpr a a -> CatExpr a b) -> CatExpr a b
 ccc x = simplify $ toCCC x
 
 --
@@ -58,12 +58,12 @@ main = do
 
 --}
 
-example2 :: FreeCat (a, b) (b, a)
+example2 :: CatExpr (a, b) (b, a)
 example2 = simplify $ toCCC (\(x, y) -> (y, x))
 
 -- You need to give the type signature unfortunately. k is too ambiguous otherwise
 -- example3 :: Cartesian k => k _ _
-example3 :: FreeCat (b'1, b'2) (b'1, b'1)
+example3 :: CatExpr (b'1, b'2) (b'1, b'1)
 example3 = simplify $ toCCC (\(z, y) -> (z, z))
 
 example4 = simplify $ toCCC (\((x, y), z) -> x)
@@ -79,7 +79,7 @@ myconst = \x -> \y -> x
 
 example8 = simplify $ toCCC myconst -- const -- (\x -> \y -> x)
 
-example9 = let f = (\x y -> x) in toCCC @FreeCat f
+example9 = let f = (\x y -> x) in toCCC @CatExpr f
 
 example10 = simplify $ toCCC (\x -> x)
 
@@ -177,29 +177,29 @@ example30 = ccc test
 iff :: (BoolLike b, EqLike b Bool) => (b, p, p) -> p
 iff (test, r, f) = if test == true then r else f
 
---cIf :: BoolLike a => FreeCat a (FreeCat b (FreeCat b b))
---cIf :: FreeCat a' (FreeCat b' (FreeCat b' b'))
+--cIf :: BoolLike a => CatExpr a (CatExpr b (CatExpr b b))
+--cIf :: CatExpr a' (CatExpr b' (CatExpr b' b'))
 --cIf = simplify $ toCCC iff
 
 isZero :: (EqLike a b, Num a, BoolLike b) => p -> a -> b
 isZero x = (== 0)
 
-cIsZero :: (EqLike (FreeCat (a', b') b') (FreeCat (a', b') c'), Num b') => FreeCat a' (FreeCat b' c')
+cIsZero :: (EqLike (CatExpr (a', b') b') (CatExpr (a', b') c'), Num b') => CatExpr a' (CatExpr b' c')
 cIsZero = simplify $ toCCC isZero
 
 isTrue :: BoolLike a => a -> a
 isTrue x = true && x
 
-cIsTrue :: BoolLike a => FreeCat a a
+cIsTrue :: BoolLike a => CatExpr a a
 cIsTrue = simplify $ toCCC isTrue
 
 fix :: (a -> a) -> a
 fix f = let x = f x in x
 
-cFix :: FreeCat (FreeCat a' a') a'
+cFix :: CatExpr (CatExpr a' a') a'
 cFix = simplify $ toCCC fix
 
-cAnd :: BoolLike b' => FreeCat (b', b') b'
+cAnd :: BoolLike b' => CatExpr (b', b') b'
 cAnd = simplify $ toCCC (uncurry (&&))
 
 --fact :: (EqlLike p p, Num p) => p -> p
@@ -208,21 +208,21 @@ cAnd = simplify $ toCCC (uncurry (&&))
 
 --check (x,y) = iff (x == 3) x y
 
---cFact :: (Ord (FreeCat a' a'), Num a') => FreeCat a' a'
+--cFact :: (Ord (CatExpr a' a'), Num a') => CatExpr a' a'
 --cFact = simplify $ toCCC fact
 
 eql :: EqLike a b => (a, a) -> b
 eql (x, y) = x == y
 
---cEqual :: (BoolLike a, EqLike (b, b) (FreeCat (b, b) a)) => FreeCat (b, b) a
---cEqual :: EqLike (FreeCat (b', b') b') (FreeCat (b', b') b) => FreeCat (b', b') b
-cEqual :: EqLike (FreeCat (b', b') b') (FreeCat (b', b') b) => FreeCat (b', b') b
+--cEqual :: (BoolLike a, EqLike (b, b) (CatExpr (b, b) a)) => CatExpr (b, b) a
+--cEqual :: EqLike (CatExpr (b', b') b') (CatExpr (b', b') b) => CatExpr (b', b') b
+cEqual :: EqLike (CatExpr (b', b') b') (CatExpr (b', b') b) => CatExpr (b', b') b
 cEqual = simplify $ toCCC eql
 
 is0 :: (BoolLike b, Num a, EqLike a b) => a -> b
 is0 x = x == 0
 
-cIs0 :: (BoolLike b, Num a, EqLike a (FreeCat a b), EqLike a b) => FreeCat a b
+cIs0 :: (BoolLike b, Num a, EqLike a (CatExpr a b), EqLike a b) => CatExpr a b
 cIs0 = simplify $ toCCC is0
 
 pair :: (Integer, Integer)
@@ -232,13 +232,13 @@ simple :: (Num a, EqLike a Bool, Eq a) => a -> a
 simple 1 = 1
 simple _ = 23
 
-cSimple :: (Num a, EqLike (FreeCat a a) Bool) => FreeCat a a
+cSimple :: (Num a, EqLike (CatExpr a a) Bool) => CatExpr a a
 cSimple = toCCC simple
 
 cnst :: a -> b -> a
 cnst = const
 
---cCnst :: FreeCat a (FreeCat b a)
+--cCnst :: CatExpr a (CatExpr b a)
 cCnst = simplify $ toCCC (cnst 7)
 
 mains :: IO ()
@@ -246,23 +246,23 @@ mains = do
   print (simple 4 :: Integer)
 
   print (is0 (78 :: Integer) :: Bool)
-  print (interp (cIs0 :: FreeCat Integer Bool) 8)
+  print (interp (cIs0 :: CatExpr Integer Bool) 8)
 
-  print (cIs0 :: FreeCat Integer Bool)
+  print (cIs0 :: CatExpr Integer Bool)
 
   print (interp cEqual pair :: Bool)
 
-  print (cIsTrue :: FreeCat Bool Bool)
+  print (cIsTrue :: CatExpr Bool Bool)
 
   print (interp cIsTrue True :: Bool)
 
-  --print (cSimple :: FreeCat Integer Integer)
+  --print (cSimple :: CatExpr Integer Integer)
 
-  print (cCnst :: FreeCat Integer (FreeCat Integer Integer))
+  print (cCnst :: CatExpr Integer (CatExpr Integer Integer))
 
   print (interp cCnst 78 :: Integer)
 
-  let x = simplify $ toCCC @FreeCat (\(x, y) -> x) --(\(x, y) -> x + y)
+  let x = simplify $ toCCC @CatExpr (\(x, y) -> x) --(\(x, y) -> x + y)
   print x
 
 --print (eval cSimple 1 :: Integer)
@@ -279,7 +279,7 @@ s p q x = p x (q x)
 cId :: a -> a
 cId = s k k
 
-ccId :: FreeCat b b
+ccId :: CatExpr b b
 ccId = ccc (s k k)
 
 x = Curry Snd

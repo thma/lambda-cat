@@ -1,9 +1,9 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 {-- This module contains instance definitions of (->) for all required type-classes.
-    This is required to allow interpretation of FreeCat terms as standard Haskell functions.
+    This is required to allow interpretation of CatExpr terms as standard Haskell functions.
 
-    See for instance eval :: FreeCat a b -> (a -> b) in the Interpreter module.
+    See for instance eval :: CatExpr a b -> (a -> b) in the Interpreter module.
 --}
 
 module Hask where

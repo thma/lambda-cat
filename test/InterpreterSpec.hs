@@ -4,7 +4,7 @@ module InterpreterSpec where
 
 import           CCC
 import           Cat
-import           FreeCat
+import           CatExpr
 import           Interpreter
 import           Prelude         (Bool (..), Double, Float, Int, Num, Integer, abs,
                                   negate, uncurry, ($), (&&), (*), (+), (-),
@@ -13,35 +13,35 @@ import           Rewrite
 import           Test.Hspec
 import           Test.QuickCheck
 
-idCCC :: FreeCat Int Int
+idCCC :: CatExpr Int Int
 idCCC = simplify . toCCC $ id
 
-addCCC :: FreeCat (Integer, Integer) Integer
+addCCC :: CatExpr (Integer, Integer) Integer
 addCCC = simplify . toCCC $ uncurry (+)
 
-mulCCC :: FreeCat (Double, Double) Double
+mulCCC :: CatExpr (Double, Double) Double
 mulCCC = simplify . toCCC $ uncurry (*)
 
-subCCC :: FreeCat (Integer, Integer) Integer
+subCCC :: CatExpr (Integer, Integer) Integer
 subCCC = simplify . toCCC $ uncurry (-)
 
-negCCC :: FreeCat Int Int
+negCCC :: CatExpr Int Int
 negCCC = simplify . toCCC $ negate
 
-absCCC :: FreeCat Float Float
+absCCC :: CatExpr Float Float
 absCCC = simplify . toCCC $ abs
 
-example6 :: FreeCat (Integer, Integer) (Integer, Integer)
+example6 :: CatExpr (Integer, Integer) (Integer, Integer)
 example6 = simplify $ toCCC (\(x, y) -> (y + (x * y), x * y))
 
-add2CCC :: FreeCat Integer Integer
+add2CCC :: CatExpr Integer Integer
 add2CCC = simplify $ toCCC (2 +)
 
-isTrueCCC :: FreeCat Bool Bool
+isTrueCCC :: CatExpr Bool Bool
 isTrueCCC = simplify $ toCCC (true Cat.&&)
 
 
-is0CCC :: FreeCat Integer Bool 
+is0CCC :: CatExpr Integer Bool 
 is0CCC = simplify $ toCCC (Cat.== 0)
 
 i :: a -> a
@@ -53,7 +53,7 @@ k y _ = y
 s :: (a -> b -> c) -> (a -> b) -> a -> c
 s p q x = p x (q x)  
 
-idCCC' :: FreeCat Int Int
+idCCC' :: CatExpr Int Int
 idCCC' = simplify $ toCCC (s k k)
 
 spec :: Spec
@@ -88,7 +88,7 @@ spec = do
 
     -- Tests for Uncurry
     it "interprets uncurried functions" $
-      let curriedAdd = toCCC (+) :: FreeCat Integer (FreeCat Integer Integer)
+      let curriedAdd = toCCC (+) :: CatExpr Integer (CatExpr Integer Integer)
           uncurriedAdd = Uncurry curriedAdd
       in property $ \x y -> interp uncurriedAdd (x, y) `shouldBe` x + y
 
@@ -102,18 +102,18 @@ spec = do
       in interp test (3, 2) `shouldBe` 1
 
     -- Tests for Fix (recursive functions)
-    -- Fix now takes a categorical step function: FreeCat (FreeCat a b, a) b
+    -- Fix now takes a categorical step function: CatExpr (CatExpr a b, a) b
     -- The step function receives (rec, input) as a pair and produces the result
     it "computes countdown via fix" $
       let -- Step: given (rec, n), produce: if n==0 then 0 else rec(n-1)
-          -- Input type: (FreeCat Integer Integer, Integer)
-          isZero = Comp Eql (fanC Snd (Comp (IntConst 0) Snd)) :: FreeCat (FreeCat Integer Integer, Integer) Bool
-          thenVal = Comp (IntConst 0) Snd :: FreeCat (FreeCat Integer Integer, Integer) Integer
+          -- Input type: (CatExpr Integer Integer, Integer)
+          isZero = Comp Eql (fanC Snd (Comp (IntConst 0) Snd)) :: CatExpr (CatExpr Integer Integer, Integer) Bool
+          thenVal = Comp (IntConst 0) Snd :: CatExpr (CatExpr Integer Integer, Integer) Integer
           -- rec(n-1): Apply . (rec, n-1)
-          decN = Comp Sub (fanC Snd (Comp (IntConst 1) Snd)) :: FreeCat (FreeCat Integer Integer, Integer) Integer
-          elseVal = Comp Apply (fanC Fst decN) :: FreeCat (FreeCat Integer Integer, Integer) Integer
+          decN = Comp Sub (fanC Snd (Comp (IntConst 1) Snd)) :: CatExpr (CatExpr Integer Integer, Integer) Integer
+          elseVal = Comp Apply (fanC Fst decN) :: CatExpr (CatExpr Integer Integer, Integer) Integer
 
-          countdownStep :: FreeCat (FreeCat Integer Integer, Integer) Integer
+          countdownStep :: CatExpr (CatExpr Integer Integer, Integer) Integer
           countdownStep = Comp IfVal (fanC isZero (fanC thenVal elseVal))
 
           countdown = Fix countdownStep
@@ -121,15 +121,15 @@ spec = do
 
     it "computes factorial via fix" $
       let -- Step: given (rec, n), produce: if n==0 then 1 else n * rec(n-1)
-          isZero = Comp Eql (fanC Snd (Comp (IntConst 0) Snd)) :: FreeCat (FreeCat Integer Integer, Integer) Bool
-          thenVal = Comp (IntConst 1) Snd :: FreeCat (FreeCat Integer Integer, Integer) Integer
+          isZero = Comp Eql (fanC Snd (Comp (IntConst 0) Snd)) :: CatExpr (CatExpr Integer Integer, Integer) Bool
+          thenVal = Comp (IntConst 1) Snd :: CatExpr (CatExpr Integer Integer, Integer) Integer
           -- n * rec(n-1)
-          n = Snd :: FreeCat (FreeCat Integer Integer, Integer) Integer
-          decN = Comp Sub (fanC Snd (Comp (IntConst 1) Snd)) :: FreeCat (FreeCat Integer Integer, Integer) Integer
-          recDecN = Comp Apply (fanC Fst decN) :: FreeCat (FreeCat Integer Integer, Integer) Integer
-          elseVal = Comp Mul (fanC n recDecN) :: FreeCat (FreeCat Integer Integer, Integer) Integer
+          n = Snd :: CatExpr (CatExpr Integer Integer, Integer) Integer
+          decN = Comp Sub (fanC Snd (Comp (IntConst 1) Snd)) :: CatExpr (CatExpr Integer Integer, Integer) Integer
+          recDecN = Comp Apply (fanC Fst decN) :: CatExpr (CatExpr Integer Integer, Integer) Integer
+          elseVal = Comp Mul (fanC n recDecN) :: CatExpr (CatExpr Integer Integer, Integer) Integer
 
-          facStep :: FreeCat (FreeCat Integer Integer, Integer) Integer
+          facStep :: CatExpr (CatExpr Integer Integer, Integer) Integer
           facStep = Comp IfVal (fanC isZero (fanC thenVal elseVal))
 
           factorial = Fix facStep
@@ -138,18 +138,18 @@ spec = do
     it "computes fibonacci via fix" $
       let -- Step: given (rec, n), produce: if n==0 then 0 else if n==1 then 1 else rec(n-1) + rec(n-2)
           -- We need nested conditionals, so we'll build them compositionally
-          isZero = Comp Eql (fanC Snd (Comp (IntConst 0) Snd)) :: FreeCat (FreeCat Integer Integer, Integer) Bool
-          isOne = Comp Eql (fanC Snd (Comp (IntConst 1) Snd)) :: FreeCat (FreeCat Integer Integer, Integer) Bool
+          isZero = Comp Eql (fanC Snd (Comp (IntConst 0) Snd)) :: CatExpr (CatExpr Integer Integer, Integer) Bool
+          isOne = Comp Eql (fanC Snd (Comp (IntConst 1) Snd)) :: CatExpr (CatExpr Integer Integer, Integer) Bool
 
-          val0 = Comp (IntConst 0) Snd :: FreeCat (FreeCat Integer Integer, Integer) Integer
-          val1 = Comp (IntConst 1) Snd :: FreeCat (FreeCat Integer Integer, Integer) Integer
+          val0 = Comp (IntConst 0) Snd :: CatExpr (CatExpr Integer Integer, Integer) Integer
+          val1 = Comp (IntConst 1) Snd :: CatExpr (CatExpr Integer Integer, Integer) Integer
 
           -- rec(n-1) + rec(n-2)
-          dec1 = Comp Sub (fanC Snd (Comp (IntConst 1) Snd)) :: FreeCat (FreeCat Integer Integer, Integer) Integer
-          dec2 = Comp Sub (fanC Snd (Comp (IntConst 2) Snd)) :: FreeCat (FreeCat Integer Integer, Integer) Integer
-          recDec1 = Comp Apply (fanC Fst dec1) :: FreeCat (FreeCat Integer Integer, Integer) Integer
-          recDec2 = Comp Apply (fanC Fst dec2) :: FreeCat (FreeCat Integer Integer, Integer) Integer
-          recSum = Comp Add (fanC recDec1 recDec2) :: FreeCat (FreeCat Integer Integer, Integer) Integer
+          dec1 = Comp Sub (fanC Snd (Comp (IntConst 1) Snd)) :: CatExpr (CatExpr Integer Integer, Integer) Integer
+          dec2 = Comp Sub (fanC Snd (Comp (IntConst 2) Snd)) :: CatExpr (CatExpr Integer Integer, Integer) Integer
+          recDec1 = Comp Apply (fanC Fst dec1) :: CatExpr (CatExpr Integer Integer, Integer) Integer
+          recDec2 = Comp Apply (fanC Fst dec2) :: CatExpr (CatExpr Integer Integer, Integer) Integer
+          recSum = Comp Add (fanC recDec1 recDec2) :: CatExpr (CatExpr Integer Integer, Integer) Integer
 
           -- Inner conditional: if n==1 then 1 else rec(n-1)+rec(n-2)
           innerCond = Comp IfVal (fanC isOne (fanC val1 recSum))

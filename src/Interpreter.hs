@@ -1,11 +1,11 @@
-{-- This module exposes a function interp that takes a (FreeCat a b) expression as input and returns a function
+{-- This module exposes a function interp that takes a (CatExpr a b) expression as input and returns a function
     of type (a -> b) which is the semantic interpretation of the CCC expression in the (->) category.
 
     > cccFst = simplify $ toCCC (\(x, y) -> x)
     > cccFst
     Fst
     > :t cccFst
-    cccFst :: FreeCat (a, b) a
+    cccFst :: CatExpr (a, b) a
     > fnFst = interp cccFst
     > :t fnFst
     fnFst :: (a, b) -> a
@@ -25,10 +25,10 @@ import           Cat     (BoolCat (andC, ifTE, notC, orC),
                           EqCat (eqlC), Monoidal (parC),
                           NumCat (addC, geqC, greC, leqC, lesC, mulC, subC),
                           applyC)
-import           FreeCat (FreeCat (..))
+import           CatExpr (CatExpr (..))
 import           Hask    ()
 
-interp :: FreeCat a b -> (a -> b)
+interp :: CatExpr a b -> (a -> b)
 interp (Comp f g)   = interp f . interp g
 interp (Par f g)    = parC (interp f) (interp g)
 interp (Curry f)    = Lift . curry (interp f)
@@ -62,7 +62,7 @@ interp IfThenElse   = \(test, (thenBranch, elseBranch)) ->
 -- Value-level conditional: selects between two values based on boolean
 interp IfVal        = \(test, (thenVal, elseVal)) ->
   if test then thenVal else elseVal
--- Fixpoint: step function is a FreeCat morphism, recursion stays categorical
+-- Fixpoint: step function is a CatExpr morphism, recursion stays categorical
 interp (Fix step)   = \a ->
   let rec = Fix step  -- the recursive call is the Fix itself
   in interp step (rec, a)
