@@ -1,14 +1,8 @@
-{-# LANGUAGE ConstraintKinds       #-}
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE GADTs                 #-}
-{-# LANGUAGE KindSignatures        #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude     #-}
-{-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE StandaloneDeriving    #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 {-- This module exposes the GADT data type FreeCat which instantiates the type classes
     Closed, Cartesian and Category (among others).
@@ -24,6 +18,7 @@ import           Cat     (BoolCat (..), BoolLike (..), Cartesian (..),
                           Category (..), Closed (..), EqCat (..), EqLike (..),
                           Monoidal (..), NumCat (..), fanC)
 import           Prelude hiding (id, (.))
+import           Text.Show.Functions ()
 
 data FreeCat a b where
   Comp :: FreeCat b c -> FreeCat a b -> FreeCat a c
@@ -67,10 +62,6 @@ instance Closed FreeCat where
   curryC = Curry
   uncurryC = Uncurry
 
--- this little hack is needed to allow auto deriving Show for FreeCat
-instance Show (a -> b) where
-  showsPrec _ _ = showString "<function>"
-
 deriving instance Show (FreeCat a b)
 
 instance Category FreeCat where
@@ -103,8 +94,9 @@ instance (Num a) => Num (FreeCat z a) where
   negate f = Neg . f
   f - g = Sub . fanC f g
   abs f = Abs . f
-  signum = error "TODO sig"
-  fromInteger i = FromInt . IntConst i --error "TODO fromInteger"
+  -- Signum has no dedicated constructor; Lift wraps Prelude.signum over the underlying type.
+  signum f = Lift Prelude.signum . f
+  fromInteger i = FromInt . IntConst i
 
 instance BoolCat FreeCat where
   andC = And
@@ -119,9 +111,6 @@ instance (BoolLike b) => BoolLike (FreeCat a b) where
   not f = Not . f
   true = T
   false = F
-
---ite :: FreeCat a b -> (FreeCat c d, FreeCat c d) -> FreeCat c d
---ite test (f,g) = undefined --_IfThenElse . test . fanC f g
 
 instance EqCat FreeCat where
   eqlC = Eql
@@ -140,7 +129,9 @@ instance
   f == g = Eql . fanC f g
 
 instance EqLike (FreeCat Integer Integer) Bool where
-  f == g = error "NYI EqLike (FreeCat Integer Integer) Bool" --Eql . fanC f g
+  _ == _ = error "NYI EqLike (FreeCat Integer Integer) Bool" --Eql . fanC f g
 
+-- Structural equality on FreeCat is not derivable due to GADT existential constraints.
+-- Returns False conservatively; the only caller (ruleParDupEq in Rewrite) is commented out.
 instance Eq (FreeCat a b) where
-  f == g = f Prelude.== g
+  _ == _ = False
