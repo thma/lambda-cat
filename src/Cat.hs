@@ -1,7 +1,4 @@
-{-# LANGUAGE AllowAmbiguousTypes   #-}
-{-# LANGUAGE ConstraintKinds       #-}
 {-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE GADTs                 #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NoImplicitPrelude     #-}
 
@@ -9,13 +6,22 @@
     modelling Closed Cartesian Categories.
 --}
 
-module Cat where
+module Cat
+  ( module Control.Category
+  , Monoidal (..)
+  , Cartesian (..)
+  , Closed (..)
+  , fanC
+  , idC
+  , NumCat (..)
+  , BoolCat (..)
+  , BoolLike (..)
+  , EqLike (..)
+  , EqCat (..)
+  ) where
 
+import           Control.Category (Category (..))
 import           Prelude hiding (id, (.))
-
-class Category cat where
-  id :: cat a a
-  (.) :: cat b c -> cat a b -> cat a c
 
 class Category k => Monoidal k where
   parC :: k a c -> k b d -> k (a, b) (c, d)
@@ -43,7 +49,6 @@ class Cartesian k => NumCat k where
   subC :: Num a => k (a, a) a
   absC :: Num a => k a a
 
-  --  eqlC :: (Eq a, BoolLike b)  => k (a,a) b
   leqC :: (Ord a, BoolLike b) => k (a, a) b
   geqC :: (Ord a, BoolLike b) => k (a, a) b
   lesC :: (Ord a, BoolLike b) => k (a, a) b

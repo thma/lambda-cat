@@ -9,11 +9,6 @@
 module Hask where
 
 import           Cat
-import qualified GHC.Base
-
-instance Category (->) where
-  id = GHC.Base.id
-  (.) = (GHC.Base..)
 
 instance Monoidal (->) where
   parC f g (x, y) = (f x, g y) -- this could also be implemented as `bimap f g` (imported from Data.Bifunctor)
