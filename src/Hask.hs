@@ -6,7 +6,10 @@
     See for instance eval :: CatExpr a b -> (a -> b) in the Interpreter module.
 --}
 
-module Hask where
+module Hask 
+  (
+    
+  ) where
 
 import           Cat
 

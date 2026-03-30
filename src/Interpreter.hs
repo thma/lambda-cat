@@ -1,7 +1,7 @@
 {-- This module exposes a function interp that takes a (CatExpr a b) expression as input and returns a function
     of type (a -> b) which is the semantic interpretation of the CCC expression in the (->) category.
 
-    > cccFst = simplify $ toCCC (\(x, y) -> x)
+    > cccFst = toCCC (\(x, y) -> x)
     > cccFst
     Fst
     > :t cccFst
