@@ -3,7 +3,6 @@
 {-# LANGUAGE FlexibleContexts       #-}
 {-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE GADTs                  #-}
 {-# LANGUAGE NoImplicitPrelude      #-}
 {-# LANGUAGE PolyKinds              #-}
 {-# LANGUAGE ScopedTypeVariables    #-}
@@ -11,7 +10,6 @@
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeOperators          #-}
 {-# LANGUAGE UndecidableInstances   #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 {-- This module exposes a compilation function toCCC, which takes a function as input 
     and returns a closed cartesian category representation of that function.
@@ -25,7 +23,6 @@
 module CCC (toCCC) where
 
 import           Cat
-import           Hask    ()
 import           Prelude hiding (id, (.))
 
 class IsTup a b | a -> b
@@ -40,34 +37,50 @@ data Left a
 
 data Right a
 
+-- Local sum used during symbolic input routing in toCCC.
+-- Keeping this local avoids needing orphan instances for Prelude.Either.
+data Branch a b = BLeft a | BRight b
+
 class EitherTree index input out | index out -> input where
   inj :: input -> out -- EitherFromFanTree b
   ext :: out -> input
 
-instance (EitherTree a b o, out ~ Either o q) => EitherTree (Left a) b out where
-  inj x = Left (inj @a @b x)
-  ext (Left x) = ext @a @b x
+instance (EitherTree a b o, out ~ Branch o q) => EitherTree (Left a) b out where
+  inj x = BLeft (inj @a @b x)
+  ext (BLeft x) = ext @a @b x
   ext _        = error "Tried to extract left"
 
-instance (EitherTree a b o, out ~ Either q o) => EitherTree (Right a) b out where
-  inj x = Right (inj @a @b x)
-  ext (Right x) = ext @a @b x
+instance (EitherTree a b o, out ~ Branch q o) => EitherTree (Right a) b out where
+  inj x = BRight (inj @a @b x)
+  ext (BRight x) = ext @a @b x
   ext _         = error "Tried to extract Right"
 
 instance (b ~ out) => EitherTree () b out where
   inj x = x
   ext x = x
 
-instance (Num b, Num a) => Num (Either a b) where
-  (Left f) + (Left g)   = Left (f + g)
-  (Right f) + (Right g) = Right (f + g)
-  (Left f) * (Left g)   = Left (f * g)
-  (Right f) * (Right g) = Right (f * g)
-  negate f = error "Todo"
-  f - g = error "todo"
-  abs f = error "todo"
-  signum = error "TODO"
-  fromInteger = error "TODO"
+instance (Num b, Num a) => Num (Branch a b) where
+  -- Arithmetic is only meaningful when both operands refer to the same route.
+  -- Cross-route arithmetic has no coherent interpretation in this routing model.
+  (BLeft f) + (BLeft g)   = BLeft (f + g)
+  (BRight f) + (BRight g) = BRight (f + g)
+  _ + _                   = error "Num Branch: mixed branches are unsupported"
+  (BLeft f) * (BLeft g)   = BLeft (f * g)
+  (BRight f) * (BRight g) = BRight (f * g)
+  _ * _                   = error "Num Branch: mixed branches are unsupported"
+  negate (BLeft x)        = BLeft (negate x)
+  negate (BRight x)       = BRight (negate x)
+  (BLeft f) - (BLeft g)   = BLeft (f - g)
+  (BRight f) - (BRight g) = BRight (f - g)
+  _ - _                   = error "Num Branch: mixed branches are unsupported"
+  abs (BLeft x)           = BLeft (abs x)
+  abs (BRight x)          = BRight (abs x)
+  signum (BLeft x)        = BLeft (signum x)
+  signum (BRight x)       = BRight (signum x)
+  -- Literals do not carry routing information, so we choose BLeft as a deterministic
+  -- default embedding. This keeps numeric desugaring total without introducing extra
+  -- constraints or ambiguous branch selection at call sites.
+  fromInteger n           = BLeft (fromInteger n)
 
 type family Reverse a b where
   Reverse (Left a) b = Reverse a (Left b)
